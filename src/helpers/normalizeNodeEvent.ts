@@ -12,7 +12,7 @@ import { Cb } from './nativeToNodeEvent'
 const NORMALIZE_LIST = ['mousemove', 'mouseout']
 let target: null | CanvasNode
 
-type EventHandler = (e: Event) => any
+export type EventHandler = (e: Event) => any
 
 export function shouldNormalizeEvent(type: string) {
   return NORMALIZE_LIST.includes(type)

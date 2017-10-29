@@ -3,3 +3,7 @@
 node_modules
 .DS_Store
 *cache
+*.map
+
+# js in lib
+lib/**/*.js

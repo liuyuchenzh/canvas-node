@@ -1,6 +1,6 @@
 import { CanvasNode, CanvasNodeOption } from './node'
 
-interface MenuOption extends CanvasNodeOption {
+export interface MenuOption extends CanvasNodeOption {
   data: {
     node: CanvasNode
   }

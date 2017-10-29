@@ -3,7 +3,7 @@ import { drawLine } from './helpers/drawArrow'
 import { Manager } from './manager'
 import { calculateStop } from './helpers/drawArrow'
 
-interface ArrowOption extends CanvasNodeOption {
+export interface ArrowOption extends CanvasNodeOption {
   ratio?: number
 }
 

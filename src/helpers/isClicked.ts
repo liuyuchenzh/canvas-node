@@ -4,7 +4,7 @@ import { Box } from '../box'
 import pointInPolygon from 'point-in-polygon'
 import { Manager } from '../manager'
 
-type Poly = [number, number][]
+export type Poly = [number, number][]
 const MARGIN_ERROR = 4
 
 /**

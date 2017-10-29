@@ -31,12 +31,12 @@ class Entry {
     removeNodeEvent(type)
   }
 
-  static drawLine(from: Pos, to: Pos): ArrowNode {
+  static drawLine(from: Pos, to?: Pos): ArrowNode {
     const line: ArrowNode = new ArrowNode({
       name: 'line',
       pos: from
     })
-    line.moveTo(to)
+    to && line.moveTo(to)
     return line
   }
 

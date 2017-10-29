@@ -1,4 +1,4 @@
-type El = Element | Document
+export type El = Element | Document
 
 interface EventItem {
   el: El

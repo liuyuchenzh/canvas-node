@@ -8,13 +8,13 @@ export interface Pos {
   y: number
 }
 
-type x = number
-type y = number
-type width = number
-type height = number
-type RawVertexes = [x, y, width, height]
+export type x = number
+export type y = number
+export type width = number
+export type height = number
+export type RawVertexes = [x, y, width, height]
 
-type DrawCb = (node: CanvasNode) => any
+export type DrawCb = (node: CanvasNode) => any
 
 export interface CanvasNodeOption {
   name: string
