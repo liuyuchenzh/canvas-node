@@ -168,6 +168,25 @@ function getDirection(start, end) {
         return startY > endY ? 'top' : 'bottom';
     }
 }
+function getDirectionForStart(start, end) {
+    var dir = getDirection(start, end);
+    var startX = start.x, startY = start.y;
+    var endX = end.x, endY = end.y;
+    switch (dir) {
+        case 'top':
+        case 'bottom':
+            if (withInMargin(startX - endX)) {
+                return endY > startY ? 'bottom' : 'top';
+            }
+            return endX > startX ? 'right' : 'left';
+        case 'left':
+        case 'right':
+            if (withInMargin(startY - endY)) {
+                return endX > startX ? 'right' : 'left';
+            }
+            return endY > startY ? 'bottom' : 'top';
+    }
+}
 function calculateStop(x1, y1, x2, y2) {
     var dir = getDirection({
         x: x1,
@@ -218,6 +237,40 @@ function centralizePoint(node) {
     return {
         x: node.pos.x + width / 2,
         y: node.pos.y + height / 2
+    };
+}
+function placePointOnEdge(start, end, node, isStart) {
+    if (isStart === void 0) { isStart = true; }
+    var dir = isStart
+        ? getDirectionForStart(start, end)
+        : getDirection(start, end);
+    return calculatePos(dir, node);
+}
+function calculatePos(dir, node) {
+    var _a = node.rawVertexes.slice(2), width = _a[0], height = _a[1];
+    var x;
+    var y;
+    switch (dir) {
+        case 'top':
+            x = node.pos.x + width / 2;
+            y = node.pos.y;
+            break;
+        case 'bottom':
+            x = node.pos.x + width / 2;
+            y = node.pos.y + height;
+            break;
+        case 'left':
+            x = node.pos.x;
+            y = node.pos.y + height / 2;
+            break;
+        case 'right':
+            x = node.pos.x + width;
+            y = node.pos.y + height / 2;
+            break;
+    }
+    return {
+        x: x,
+        y: y
     };
 }
 
@@ -335,9 +388,6 @@ var CanvasNode = (function () {
     };
     CanvasNode.prototype.forEach = function (fn) {
         Manager.list.forEach(fn);
-    };
-    CanvasNode.prototype.setOrigin = function () {
-        this.data['origin'] = true;
     };
     CanvasNode.prototype.addDrawCb = function (cb) {
         this.drawCbs.push(cb);
@@ -647,7 +697,7 @@ var Entry = (function () {
             name: 'line',
             pos: from
         });
-        line.moveTo(to);
+        to && line.moveTo(to);
         return line;
     };
     Entry.connect = function (line, from, to) {
@@ -658,6 +708,8 @@ var Entry = (function () {
     Entry.getClickedBox = getClickedBox;
     Entry.getClickedNode = getClickedNode;
     Entry.getClickedLine = getClickedLine;
+    Entry.centralizePoint = centralizePoint;
+    Entry.placePointOnEdge = placePointOnEdge;
     return Entry;
 }());
 

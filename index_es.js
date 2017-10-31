@@ -134,6 +134,25 @@ function getDirection(start, end) {
         return startY > endY ? 'top' : 'bottom';
     }
 }
+function getDirectionForStart(start, end) {
+    const dir = getDirection(start, end);
+    const { x: startX, y: startY } = start;
+    const { x: endX, y: endY } = end;
+    switch (dir) {
+        case 'top':
+        case 'bottom':
+            if (withInMargin(startX - endX)) {
+                return endY > startY ? 'bottom' : 'top';
+            }
+            return endX > startX ? 'right' : 'left';
+        case 'left':
+        case 'right':
+            if (withInMargin(startY - endY)) {
+                return endX > startX ? 'right' : 'left';
+            }
+            return endY > startY ? 'bottom' : 'top';
+    }
+}
 function calculateStop(x1, y1, x2, y2) {
     const dir = getDirection({
         x: x1,
@@ -184,6 +203,39 @@ function centralizePoint(node) {
     return {
         x: node.pos.x + width / 2,
         y: node.pos.y + height / 2
+    };
+}
+function placePointOnEdge(start, end, node, isStart = true) {
+    const dir = isStart
+        ? getDirectionForStart(start, end)
+        : getDirection(start, end);
+    return calculatePos(dir, node);
+}
+function calculatePos(dir, node) {
+    const [width, height] = node.rawVertexes.slice(2);
+    let x;
+    let y;
+    switch (dir) {
+        case 'top':
+            x = node.pos.x + width / 2;
+            y = node.pos.y;
+            break;
+        case 'bottom':
+            x = node.pos.x + width / 2;
+            y = node.pos.y + height;
+            break;
+        case 'left':
+            x = node.pos.x;
+            y = node.pos.y + height / 2;
+            break;
+        case 'right':
+            x = node.pos.x + width;
+            y = node.pos.y + height / 2;
+            break;
+    }
+    return {
+        x,
+        y
     };
 }
 
@@ -293,9 +345,6 @@ class CanvasNode {
     }
     forEach(fn) {
         Manager.list.forEach(fn);
-    }
-    setOrigin() {
-        this.data['origin'] = true;
     }
     addDrawCb(cb) {
         this.drawCbs.push(cb);
@@ -585,7 +634,7 @@ class Entry {
             name: 'line',
             pos: from
         });
-        line.moveTo(to);
+        to && line.moveTo(to);
         return line;
     }
     static connect(line, from, to) {
@@ -597,5 +646,7 @@ Entry.nativeRemoveEvent = removeEvent;
 Entry.getClickedBox = getClickedBox;
 Entry.getClickedNode = getClickedNode;
 Entry.getClickedLine = getClickedLine;
+Entry.centralizePoint = centralizePoint;
+Entry.placePointOnEdge = placePointOnEdge;
 
 export default Entry;

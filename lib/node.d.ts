@@ -53,6 +53,5 @@ export declare class CanvasNode implements CanvasNodeOption {
     updateLinePos(): void;
     remove(node?: CanvasNode): void;
     forEach(fn: (node: CanvasNode, i: number, list: CanvasNode[]) => any): void;
-    setOrigin(): void;
     addDrawCb(cb: DrawCb): void;
 }

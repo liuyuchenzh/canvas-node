@@ -180,10 +180,6 @@ export class CanvasNode implements CanvasNodeOption {
     Manager.list.forEach(fn)
   }
 
-  setOrigin() {
-    this.data['origin'] = true
-  }
-
   addDrawCb(cb: DrawCb) {
     this.drawCbs.push(cb)
   }

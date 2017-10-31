@@ -13,6 +13,7 @@ import {
   getClickedNode,
   getClickedLine
 } from './helpers/isClicked'
+import { centralizePoint, placePointOnEdge } from './helpers/drawArrow'
 
 class Entry {
   static init(option: ManagerOption) {
@@ -49,6 +50,8 @@ class Entry {
   static getClickedBox = getClickedBox
   static getClickedNode = getClickedNode
   static getClickedLine = getClickedLine
+  static centralizePoint = centralizePoint
+  static placePointOnEdge = placePointOnEdge
 }
 
 export { Entry as default }

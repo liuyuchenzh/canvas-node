@@ -35,14 +35,13 @@ function normalizeEndPoint(startPoint: number, endPoint: number) {
 }
 
 /**
- * get direction of the arrow
+ * get direction of the arrow (for end point)
  * @param {Pos} start
  * @param {Pos} end
  * @returns {string}
  */
 function getDirection(start: Pos, end: Pos): string {
   const { x: startX, y: startY } = start
-
   const { x: endX, y: endY } = end
   if (withInMargin(startY - endY)) {
     return startX > endX ? 'left' : 'right'
@@ -50,6 +49,32 @@ function getDirection(start: Pos, end: Pos): string {
     return startY > endY ? 'top' : 'bottom'
   } else {
     return startY > endY ? 'top' : 'bottom'
+  }
+}
+
+/**
+ * get direction for start point
+ * @param {Pos} start
+ * @param {Pos} end
+ * @returns {string}
+ */
+function getDirectionForStart(start: Pos, end: Pos): string {
+  const dir: string = getDirection(start, end)
+  const { x: startX, y: startY } = start
+  const { x: endX, y: endY } = end
+  switch (dir) {
+    case 'top':
+    case 'bottom':
+      if (withInMargin(startX - endX)) {
+        return endY > startY ? 'bottom' : 'top'
+      }
+      return endX > startX ? 'right' : 'left'
+    case 'left':
+    case 'right':
+      if (withInMargin(startY - endY)) {
+        return endX > startX ? 'right' : 'left'
+      }
+      return endY > startY ? 'bottom' : 'top'
   }
 }
 
@@ -124,7 +149,7 @@ export function drawLine(
   // get rotate angle
   const angle: number = Math.atan(tan)
   const goLeft: boolean = $endX < startX
-  const rotateAngle: number = goLeft ?  angle - Math.PI  : angle
+  const rotateAngle: number = goLeft ? angle - Math.PI : angle
   ctx.lineWidth = 2
   ctx.stroke()
   ctx.save()
@@ -145,5 +170,59 @@ export function centralizePoint(node: CanvasNode): Pos {
   return {
     x: node.pos.x + width / 2,
     y: node.pos.y + height / 2
+  }
+}
+
+/**
+ * place point on the edge of polygon
+ * @param {Pos} start
+ * @param {Pos} end
+ * @param {CanvasNode} node
+ * @param {boolean} isStart
+ * @returns {Pos}
+ */
+export function placePointOnEdge(
+  start: Pos,
+  end: Pos,
+  node: CanvasNode,
+  isStart: boolean = true
+): Pos {
+  const dir: string = isStart
+    ? getDirectionForStart(start, end)
+    : getDirection(start, end)
+  return calculatePos(dir, node)
+}
+
+/**
+ * given direction and targeted node, get the coordinate of point on edge
+ * @param {string} dir
+ * @param {CanvasNode} node
+ * @returns {Pos}
+ */
+function calculatePos(dir: string, node: CanvasNode): Pos {
+  const [width, height] = node.rawVertexes.slice(2)
+  let x: number
+  let y: number
+  switch (dir) {
+    case 'top':
+      x = node.pos.x + width / 2
+      y = node.pos.y
+      break
+    case 'bottom':
+      x = node.pos.x + width / 2
+      y = node.pos.y + height
+      break
+    case 'left':
+      x = node.pos.x
+      y = node.pos.y + height / 2
+      break
+    case 'right':
+      x = node.pos.x + width
+      y = node.pos.y + height / 2
+      break
+  }
+  return {
+    x,
+    y
   }
 }
