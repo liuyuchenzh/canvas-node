@@ -1,15 +1,43 @@
+/*! *****************************************************************************
+Copyright (c) Microsoft Corporation. All rights reserved.
+Licensed under the Apache License, Version 2.0 (the "License"); you may not use
+this file except in compliance with the License. You may obtain a copy of the
+License at http://www.apache.org/licenses/LICENSE-2.0
+
+THIS CODE IS PROVIDED ON AN *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+MERCHANTABLITY OR NON-INFRINGEMENT.
+
+See the Apache Version 2.0 License for specific language governing permissions
+and limitations under the License.
+***************************************************************************** */
+/* global Reflect, Promise */
+
+var extendStatics = Object.setPrototypeOf ||
+    ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+    function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+
+function __extends(d, b) {
+    extendStatics(d, b);
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+}
+
 function getVertexesForRect(raw) {
     if (raw.length > 4)
         console.error('only support rect now!');
-    const [x, y, w, h] = raw;
+    var x = raw[0], y = raw[1], w = raw[2], h = raw[3];
     return [x, y, x + w, y, x + w, y + h, x, y + h];
 }
 
-class Box extends CanvasNode {
-    constructor(option) {
-        super(option);
+var Box = (function (_super) {
+    __extends(Box, _super);
+    function Box(option) {
+        return _super.call(this, option) || this;
     }
-}
+    return Box;
+}(CanvasNode));
 
 var pointInPolygon = function (point, vs) {
     // ray-casting algorithm based on
@@ -30,17 +58,17 @@ var pointInPolygon = function (point, vs) {
     return inside;
 };
 
-const MARGIN_ERROR$1 = 4;
+var MARGIN_ERROR$1 = 4;
 function isPointInPolygon(vertexes, pos) {
-    const poly = convertToPoly(vertexes);
+    var poly = convertToPoly(vertexes);
     return isPointInPath(pos.x, pos.y, poly);
 }
 function isPointInPath(x, y, poly) {
     return pointInPolygon([x, y], poly);
 }
 function convertToPoly(vertexes) {
-    return vertexes.reduce((last, vertex, i) => {
-        const pos = Math.floor(i / 2);
+    return vertexes.reduce(function (last, vertex, i) {
+        var pos = Math.floor(i / 2);
         if (!last[pos]) {
             last[pos] = [];
         }
@@ -53,17 +81,17 @@ function isPointOnCurve(poly, pos) {
         console.error('only support Quadratic Bézier curves for now');
         return false;
     }
-    const { x, y } = pos;
-    const [start, control, end] = poly;
-    const [startX, startY] = start;
-    const [controlX, controlY] = control;
-    const [endX, endY] = end;
-    const numOfTest = Math.floor(distanceBetween2Points(startX, startY, endX, endY)) / 2;
-    const inc = 1 / numOfTest;
-    let t = inc;
+    var x = pos.x, y = pos.y;
+    var start = poly[0], control = poly[1], end = poly[2];
+    var startX = start[0], startY = start[1];
+    var controlX = control[0], controlY = control[1];
+    var endX = end[0], endY = end[1];
+    var numOfTest = Math.floor(distanceBetween2Points(startX, startY, endX, endY)) / 2;
+    var inc = 1 / numOfTest;
+    var t = inc;
     while (t < 1) {
-        const lineX = simulateCurve(startX, controlX, endX, t);
-        const lineY = simulateCurve(startY, controlY, endY, t);
+        var lineX = simulateCurve(startX, controlX, endX, t);
+        var lineY = simulateCurve(startY, controlY, endY, t);
         if (distanceBetween2Points(x, y, lineX, lineY) < MARGIN_ERROR$1)
             return true;
         t += inc;
@@ -77,12 +105,12 @@ function getDirective(p0, p1, p2, t) {
     return 2 * (1 - t) * (p1 - p0) + 2 * t * (p2 - p1);
 }
 function distanceBetween2Points(x1, y1, x2, y2) {
-    const squareDis = Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
+    var squareDis = Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
     return Math.pow(squareDis, 0.5);
 }
 function getClickedNode(pos) {
-    const list = Manager.list;
-    return list.find(node => {
+    var list = Manager.list;
+    return list.find(function (node) {
         if (node instanceof ArrowNode) {
             return isPointOnCurve(node.stops, pos);
         }
@@ -92,7 +120,7 @@ function getClickedNode(pos) {
     });
 }
 function getClickedBox(pos) {
-    return Manager.list.filter(node => node instanceof Box).find(node => {
+    return Manager.list.filter(function (node) { return node instanceof Box; }).find(function (node) {
         if (!node.vertexes)
             return false;
         return isPointInPolygon(node.vertexes, pos);
@@ -100,13 +128,13 @@ function getClickedBox(pos) {
 }
 function getClickedLine(pos) {
     return Manager.list
-        .filter(node => node instanceof ArrowNode)
-        .find((node) => isPointOnCurve(node.stops, pos));
+        .filter(function (node) { return node instanceof ArrowNode; })
+        .find(function (node) { return isPointOnCurve(node.stops, pos); });
 }
 
-const MARGIN_ERROR = 5;
+var MARGIN_ERROR = 5;
 function drawTriangle() {
-    const triangle = new Path2D();
+    var triangle = new Path2D();
     triangle.moveTo(0, 0);
     triangle.lineTo(0, 5);
     triangle.lineTo(15, 0);
@@ -118,12 +146,12 @@ function withInMargin(diff) {
     return Math.abs(diff) < MARGIN_ERROR;
 }
 function normalizeEndPoint(startPoint, endPoint) {
-    const diff = startPoint - endPoint;
+    var diff = startPoint - endPoint;
     return withInMargin(diff) ? startPoint : endPoint;
 }
 function getDirection(start, end) {
-    const { x: startX, y: startY } = start;
-    const { x: endX, y: endY } = end;
+    var startX = start.x, startY = start.y;
+    var endX = end.x, endY = end.y;
     if (withInMargin(startY - endY)) {
         return startX > endX ? 'left' : 'right';
     }
@@ -135,9 +163,9 @@ function getDirection(start, end) {
     }
 }
 function getDirectionForStart(start, end) {
-    const dir = getDirection(start, end);
-    const { x: startX, y: startY } = start;
-    const { x: endX, y: endY } = end;
+    var dir = getDirection(start, end);
+    var startX = start.x, startY = start.y;
+    var endX = end.x, endY = end.y;
     switch (dir) {
         case 'top':
         case 'bottom':
@@ -154,7 +182,7 @@ function getDirectionForStart(start, end) {
     }
 }
 function calculateStop(x1, y1, x2, y2) {
-    const dir = getDirection({
+    var dir = getDirection({
         x: x1,
         y: y1
     }, {
@@ -173,48 +201,49 @@ function calculateStop(x1, y1, x2, y2) {
     }
 }
 function drawLine(ctx, start, end, ratio) {
-    const { x: startX, y: startY } = start;
-    const { x: endX, y: endY } = end;
-    const $endX = normalizeEndPoint(startX, endX);
-    const $endY = normalizeEndPoint(startY, endY);
+    var startX = start.x, startY = start.y;
+    var endX = end.x, endY = end.y;
+    var $endX = normalizeEndPoint(startX, endX);
+    var $endY = normalizeEndPoint(startY, endY);
     ctx.beginPath();
     ctx.moveTo(startX, startY);
-    const stop = calculateStop(startX, startY, $endX, $endY);
+    var stop = calculateStop(startX, startY, $endX, $endY);
     ctx.quadraticCurveTo(stop[0], stop[1], $endX, $endY);
-    const arrowX = simulateCurve(startX, stop[0], $endX, ratio);
-    const arrowY = simulateCurve(startY, stop[1], $endY, ratio);
-    const arrowDirX = getDirective(startX, stop[0], $endX, ratio);
-    const arrowDirY = getDirective(startY, stop[1], $endY, ratio);
-    const tan = arrowDirY / arrowDirX;
-    const angle = Math.atan(tan);
-    const goLeft = $endX < startX;
-    const rotateAngle = goLeft ? angle - Math.PI : angle;
+    var arrowX = simulateCurve(startX, stop[0], $endX, ratio);
+    var arrowY = simulateCurve(startY, stop[1], $endY, ratio);
+    var arrowDirX = getDirective(startX, stop[0], $endX, ratio);
+    var arrowDirY = getDirective(startY, stop[1], $endY, ratio);
+    var tan = arrowDirY / arrowDirX;
+    var angle = Math.atan(tan);
+    var goLeft = $endX < startX;
+    var rotateAngle = goLeft ? angle - Math.PI : angle;
     ctx.lineWidth = 2;
     ctx.stroke();
     ctx.save();
     ctx.translate(arrowX, arrowY);
     ctx.rotate(rotateAngle);
-    const triangle = drawTriangle();
+    var triangle = drawTriangle();
     ctx.fill(triangle);
     ctx.restore();
 }
 function centralizePoint(node) {
-    const [width, height] = node.rawVertexes.slice(2);
+    var _a = node.rawVertexes.slice(2), width = _a[0], height = _a[1];
     return {
         x: node.pos.x + width / 2,
         y: node.pos.y + height / 2
     };
 }
-function placePointOnEdge(start, end, node, isStart = true) {
-    const dir = isStart
+function placePointOnEdge(start, end, node, isStart) {
+    if (isStart === void 0) { isStart = true; }
+    var dir = isStart
         ? getDirectionForStart(start, end)
         : getDirection(start, end);
     return calculatePos(dir, node);
 }
 function calculatePos(dir, node) {
-    const [width, height] = node.rawVertexes.slice(2);
-    let x;
-    let y;
+    var _a = node.rawVertexes.slice(2), width = _a[0], height = _a[1];
+    var x;
+    var y;
     switch (dir) {
         case 'top':
             x = node.pos.x + width / 2;
@@ -234,8 +263,8 @@ function calculatePos(dir, node) {
             break;
     }
     return {
-        x,
-        y
+        x: x,
+        y: y
     };
 }
 
@@ -247,8 +276,8 @@ function defaultData() {
         data: {}
     };
 }
-class CanvasNode {
-    constructor(option) {
+var CanvasNode = (function () {
+    function CanvasNode(option) {
         this.drawCbs = [];
         this.lines = [];
         Object.assign(this, defaultData(), option, {
@@ -258,24 +287,29 @@ class CanvasNode {
         this.$moveTo(this.pos);
         Manager.add(this);
     }
-    get vertexes() {
-        if (!this.rawVertexes)
-            return;
-        const rawData = this.rawVertexes.map((vertex, i) => {
-            const pos = i === 0 ? 'x' : i === 1 ? 'y' : 'z';
-            return i < 2 ? vertex + this.pos[pos] : vertex;
-        });
-        return getVertexesForRect(rawData);
-    }
-    moveTo(pos) {
+    Object.defineProperty(CanvasNode.prototype, "vertexes", {
+        get: function () {
+            var _this = this;
+            if (!this.rawVertexes)
+                return;
+            var rawData = this.rawVertexes.map(function (vertex, i) {
+                var pos = i === 0 ? 'x' : i === 1 ? 'y' : 'z';
+                return i < 2 ? vertex + _this.pos[pos] : vertex;
+            });
+            return getVertexesForRect(rawData);
+        },
+        enumerable: true,
+        configurable: true
+    });
+    CanvasNode.prototype.moveTo = function (pos) {
         Manager.moveTo(this, pos);
-    }
-    $moveTo(pos) {
+    };
+    CanvasNode.prototype.$moveTo = function (pos) {
         this.updatePos(pos);
         this.$draw();
         this.updateLinePos();
-    }
-    $draw() {
+    };
+    CanvasNode.prototype.$draw = function () {
         this.ctx.save();
         this.ctx.translate(this.pos.x, this.pos.y);
         this.drawBorder();
@@ -283,30 +317,31 @@ class CanvasNode {
         this.fillText();
         this.invokeDrawCb();
         this.ctx.restore();
-    }
-    draw() {
+    };
+    CanvasNode.prototype.draw = function () {
         Manager.draw();
-    }
-    updatePos(pos) {
+    };
+    CanvasNode.prototype.updatePos = function (pos) {
         this.pos = pos;
-    }
-    drawBorder() {
+    };
+    CanvasNode.prototype.drawBorder = function () {
         if (!this.path)
             return;
         this.ctx.strokeStyle = this.strokeStyle;
         this.ctx.stroke(this.path);
-    }
-    fill() {
+    };
+    CanvasNode.prototype.fill = function () {
         if (!this.path)
             return;
         this.ctx.fillStyle = this.style;
         this.ctx.fill(this.path);
-    }
-    fillText(text = this.text) {
+    };
+    CanvasNode.prototype.fillText = function (text) {
+        if (text === void 0) { text = this.text; }
         if (!this.path)
             return;
-        const $text = typeof text === 'string' ? text : this.text;
-        const [width, height] = this.rawVertexes.slice(2);
+        var $text = typeof text === 'string' ? text : this.text;
+        var _a = this.rawVertexes.slice(2), width = _a[0], height = _a[1];
         this.ctx.font = this.font;
         this.ctx.textAlign = 'center';
         this.ctx.textBaseline = 'middle';
@@ -316,180 +351,205 @@ class CanvasNode {
         this.ctx.fillText($text, 0, 0);
         this.updateText($text);
         this.ctx.restore();
-    }
-    updateText(text) {
+    };
+    CanvasNode.prototype.updateText = function (text) {
         this.text = text;
-    }
-    invokeDrawCb() {
-        this.drawCbs.forEach(cb => cb(this));
-    }
-    addLine(line) {
+    };
+    CanvasNode.prototype.invokeDrawCb = function () {
+        var _this = this;
+        this.drawCbs.forEach(function (cb) { return cb(_this); });
+    };
+    CanvasNode.prototype.addLine = function (line) {
         this.lines.push(line);
-    }
-    updateLinePos() {
-        this.lines.forEach(line => {
-            switch (this) {
+    };
+    CanvasNode.prototype.updateLinePos = function () {
+        var _this = this;
+        this.lines.forEach(function (line) {
+            switch (_this) {
                 case line.from:
-                    line.pos = centralizePoint(this);
+                    line.pos = centralizePoint(_this);
                     break;
                 case line.to:
-                    line.endPos = centralizePoint(this);
+                    line.endPos = centralizePoint(_this);
                     break;
             }
         });
-    }
-    remove(node) {
+    };
+    CanvasNode.prototype.remove = function (node) {
         node && Manager.deleteNode(node);
         Manager.deleteNode(this);
         Manager.draw();
-    }
-    forEach(fn) {
+    };
+    CanvasNode.prototype.forEach = function (fn) {
         Manager.list.forEach(fn);
-    }
-    addDrawCb(cb) {
+    };
+    CanvasNode.prototype.addDrawCb = function (cb) {
         this.drawCbs.push(cb);
-    }
-}
+    };
+    return CanvasNode;
+}());
 
 function getDefaultOption() {
     return {
         ratio: 0.5
     };
 }
-class ArrowNode extends CanvasNode {
-    constructor(option) {
-        super(Object.assign({}, getDefaultOption(), option));
+var ArrowNode = (function (_super) {
+    __extends(ArrowNode, _super);
+    function ArrowNode(option) {
+        return _super.call(this, Object.assign({}, getDefaultOption(), option)) || this;
     }
-    get stops() {
-        const stop = calculateStop(this.pos.x, this.pos.y, this.endPos.x, this.endPos.y);
-        return [[this.pos.x, this.pos.y], stop, [this.endPos.x, this.endPos.y]];
-    }
-    $moveTo(end) {
+    Object.defineProperty(ArrowNode.prototype, "stops", {
+        get: function () {
+            var stop = calculateStop(this.pos.x, this.pos.y, this.endPos.x, this.endPos.y);
+            return [[this.pos.x, this.pos.y], stop, [this.endPos.x, this.endPos.y]];
+        },
+        enumerable: true,
+        configurable: true
+    });
+    ArrowNode.prototype.$moveTo = function (end) {
         this.updateEndPos(end);
         drawLine(this.ctx, this.pos, end, this.ratio);
-    }
-    $draw() {
+    };
+    ArrowNode.prototype.$draw = function () {
         drawLine(this.ctx, this.pos, this.endPos, this.ratio);
-    }
-    updateEndPos(end) {
+    };
+    ArrowNode.prototype.updateEndPos = function (end) {
         this.endPos = end;
-    }
-    connect(from, to) {
+    };
+    ArrowNode.prototype.connect = function (from, to) {
+        var _this = this;
         this.from = from;
         this.to = to;
-        [from, to].forEach(node => {
-            node.addLine(this);
+        [from, to].forEach(function (node) {
+            node.addLine(_this);
         });
-    }
-    abort() {
+    };
+    ArrowNode.prototype.abort = function () {
         Manager.deleteNode(this);
         Manager.draw();
-    }
-}
+    };
+    return ArrowNode;
+}(CanvasNode));
 
-class Manager {
-    static init(option) {
-        const { canvas } = option;
-        const size = {
+var Manager = (function () {
+    function Manager() {
+    }
+    Manager.init = function (option) {
+        var canvas = option.canvas;
+        var size = {
             x: canvas.width,
             y: canvas.height
         };
-        const ctx = canvas.getContext('2d');
+        var ctx = canvas.getContext('2d');
         this.bindSize(size);
         this.bindCtx(ctx);
         this.bindCanvas(canvas);
-    }
-    static add(node) {
+    };
+    Manager.add = function (node) {
         this.list.push(node);
-    }
-    static bindSize(size) {
+    };
+    Manager.bindSize = function (size) {
         this.size = size;
-    }
-    static bindCtx(ctx) {
+    };
+    Manager.bindCtx = function (ctx) {
         this.ctx = ctx;
-    }
-    static bindCanvas(canvas) {
+    };
+    Manager.bindCanvas = function (canvas) {
         this.canvas = canvas;
-    }
-    static draw() {
+    };
+    Manager.draw = function () {
         this.ctx.clearRect(0, 0, this.size.x, this.size.y);
         this.ctx.save();
-        this.list.forEach(node => {
+        this.list.forEach(function (node) {
             node.$draw();
         });
         this.ctx.restore();
-    }
-    static moveTo(target, pos) {
+    };
+    Manager.moveTo = function (target, pos) {
         this.ctx.clearRect(0, 0, this.size.x, this.size.y);
         this.ctx.save();
-        this.list.forEach(node => {
-            const isArrowNode = node instanceof ArrowNode;
-            const $pos = node === target
+        this.list.forEach(function (node) {
+            var isArrowNode = node instanceof ArrowNode;
+            var $pos = node === target
                 ? pos
                 : isArrowNode ? node.endPos : node.pos;
             node.$moveTo($pos);
         });
         this.ctx.restore();
-    }
-    static deleteNode(target) {
-        const index = this.list.findIndex(node => node === target);
+    };
+    Manager.deleteNode = function (target) {
+        var _this = this;
+        var index = this.list.findIndex(function (node) { return node === target; });
         this.list.splice(index, 1);
         if (target.lines.length) {
-            target.lines.forEach(line => {
-                this.list = this.list.filter(node => node !== line);
+            target.lines.forEach(function (line) {
+                _this.list = _this.list.filter(function (node) { return node !== line; });
             });
         }
         if (target instanceof ArrowNode) {
             this.deleteConnectedBox(target);
         }
-    }
-    static deleteConnectedBox(line) {
+    };
+    Manager.deleteConnectedBox = function (line) {
         if (!line.to || !line.from)
             return;
-        const fromNode = line.from;
-        const toNode = line.to;
-        [fromNode, toNode].forEach(node => {
-            node.lines = node.lines.filter(oldLine => oldLine !== line);
+        var fromNode = line.from;
+        var toNode = line.to;
+        [fromNode, toNode].forEach(function (node) {
+            node.lines = node.lines.filter(function (oldLine) { return oldLine !== line; });
         });
-    }
-}
-Manager.list = [];
+    };
+    Manager.list = [];
+    return Manager;
+}());
 
-class EventManager {
-    static add(el, type, cb) {
-        let item = findEventItem(el, type);
+var Menu = (function (_super) {
+    __extends(Menu, _super);
+    function Menu(option) {
+        return _super.call(this, option) || this;
+    }
+    return Menu;
+}(CanvasNode));
+
+var EventManager = (function () {
+    function EventManager() {
+    }
+    EventManager.add = function (el, type, cb) {
+        var item = findEventItem(el, type);
         if (!item) {
             item = {
-                el,
-                type,
+                el: el,
+                type: type,
                 cbs: []
             };
         }
         item.cbs.push(cb);
         this.list.push(item);
-    }
-    static remove(el, type, cb) {
-        const item = findEventItem(el, type);
+    };
+    EventManager.remove = function (el, type, cb) {
+        var item = findEventItem(el, type);
         if (!item)
             return;
         if (!cb) {
             item.cbs = [];
         }
         else {
-            item.cbs = item.cbs.filter(oldCb => oldCb !== cb);
+            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
         }
-    }
-}
-EventManager.list = [];
+    };
+    EventManager.list = [];
+    return EventManager;
+}());
 function findEventItem(el, type) {
-    return EventManager.list.find(item => item.el === el && item.type === type);
+    return EventManager.list.find(function (item) { return item.el === el && item.type === type; });
 }
 function addEvent(el, type, cb) {
-    const item = findEventItem(el, type);
+    var item = findEventItem(el, type);
     if (!item) {
         el.addEventListener(type, function handler(e) {
-            const cbs = findEventItem(el, type).cbs;
-            cbs.forEach(cb => {
+            var cbs = findEventItem(el, type).cbs;
+            cbs.forEach(function (cb) {
                 cb(e);
             });
         });
@@ -500,8 +560,8 @@ function removeEvent(el, type, cb) {
     EventManager.remove(el, type, cb);
 }
 
-const NORMALIZE_LIST = ['mousemove', 'mouseout'];
-let target;
+var NORMALIZE_LIST = ['mousemove', 'mouseout'];
+var target;
 function shouldNormalizeEvent(type) {
     return NORMALIZE_LIST.includes(type);
 }
@@ -520,11 +580,11 @@ function normalizeEventType(type) {
 }
 function generateMouseMoveHandler(cb) {
     return function handler(e) {
-        const pos = {
+        var pos = {
             x: e.offsetX,
             y: e.offsetY
         };
-        const node = getClickedNode(pos);
+        var node = getClickedNode(pos);
         if (!node)
             return;
         target = node;
@@ -533,11 +593,11 @@ function generateMouseMoveHandler(cb) {
 }
 function generateMouseOutHandler(cb) {
     return function handler(e) {
-        const pos = {
+        var pos = {
             x: e.offsetX,
             y: e.offsetY
         };
-        const node = getClickedNode(pos);
+        var node = getClickedNode(pos);
         if (node === target)
             return;
         if (!target)
@@ -547,12 +607,14 @@ function generateMouseOutHandler(cb) {
     };
 }
 
-class NodeEventManager {
-    static add(type, cb) {
-        let item = this.getItem(type);
+var NodeEventManager = (function () {
+    function NodeEventManager() {
+    }
+    NodeEventManager.add = function (type, cb) {
+        var item = this.getItem(type);
         if (!item) {
             item = {
-                type,
+                type: type,
                 cbs: [cb]
             };
             this.list.push(item);
@@ -560,29 +622,30 @@ class NodeEventManager {
         else {
             item.cbs.push(cb);
         }
-    }
-    static getCbs(type) {
+    };
+    NodeEventManager.getCbs = function (type) {
         return this.getItem(type).cbs;
-    }
-    static getItem(type) {
-        return this.list.find(item => item.type === type);
-    }
-    static remove(type, cb) {
+    };
+    NodeEventManager.getItem = function (type) {
+        return this.list.find(function (item) { return item.type === type; });
+    };
+    NodeEventManager.remove = function (type, cb) {
         if (!cb) {
-            this.list = this.list.filter(item => item.type !== type);
+            this.list = this.list.filter(function (item) { return item.type !== type; });
         }
         else {
-            const item = this.getItem(type);
+            var item = this.getItem(type);
             if (!item)
                 return;
-            item.cbs = item.cbs.filter(oldCb => oldCb !== cb);
+            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
         }
-    }
-}
-NodeEventManager.list = [];
+    };
+    NodeEventManager.list = [];
+    return NodeEventManager;
+}());
 function listenToNodeEvent(type, cb) {
-    const $type = normalizeEventType(type);
-    let fn;
+    var $type = normalizeEventType(type);
+    var fn;
     if (shouldNormalizeEvent(type)) {
         fn = normalizeEvent(type, cb);
     }
@@ -590,11 +653,11 @@ function listenToNodeEvent(type, cb) {
         fn = eventHandler;
     }
     function eventHandler(e) {
-        const pos = {
+        var pos = {
             x: e.offsetX,
             y: e.offsetY
         };
-        const target = getClickedNode(pos);
+        var target = getClickedNode(pos);
         if (!target)
             return;
         cb(target);
@@ -603,50 +666,57 @@ function listenToNodeEvent(type, cb) {
     NodeEventManager.add(type, fn);
 }
 function removeNodeEvent(type, cb) {
-    const $type = normalizeEventType(type);
+    var $type = normalizeEventType(type);
     if (cb) {
         removeEvent(Manager.canvas, $type, cb);
         NodeEventManager.remove(type, cb);
     }
     else {
-        NodeEventManager.getCbs(type).forEach(cb => {
+        NodeEventManager.getCbs(type).forEach(function (cb) {
             removeEvent(Manager.canvas, $type, cb);
         });
         NodeEventManager.remove(type);
     }
 }
 
-class Entry {
-    static init(option) {
+var Entry = (function () {
+    function Entry() {
+    }
+    Entry.init = function (option) {
         Manager.init(option);
-    }
-    static drawBox(option) {
+    };
+    Entry.drawBox = function (option) {
         return new Box(option);
-    }
-    static addEvent(type, cb) {
+    };
+    Entry.addEvent = function (type, cb) {
         listenToNodeEvent(type, cb);
-    }
-    static removeEvent(type) {
+    };
+    Entry.removeEvent = function (type) {
         removeNodeEvent(type);
-    }
-    static drawLine(from, to) {
-        const line = new ArrowNode({
+    };
+    Entry.drawLine = function (from, to) {
+        var line = new ArrowNode({
             name: 'line',
             pos: from
         });
         to && line.moveTo(to);
         return line;
-    }
-    static connect(line, from, to) {
+    };
+    Entry.connect = function (line, from, to) {
         line.connect(from, to);
-    }
-}
-Entry.nativeAddEvent = addEvent;
-Entry.nativeRemoveEvent = removeEvent;
-Entry.getClickedBox = getClickedBox;
-Entry.getClickedNode = getClickedNode;
-Entry.getClickedLine = getClickedLine;
-Entry.centralizePoint = centralizePoint;
-Entry.placePointOnEdge = placePointOnEdge;
+    };
+    Entry.nativeAddEvent = addEvent;
+    Entry.nativeRemoveEvent = removeEvent;
+    Entry.getClickedBox = getClickedBox;
+    Entry.getClickedNode = getClickedNode;
+    Entry.getClickedLine = getClickedLine;
+    Entry.centralizePoint = centralizePoint;
+    Entry.placePointOnEdge = placePointOnEdge;
+    Entry.ArrowNode = ArrowNode;
+    Entry.Box = Box;
+    Entry.Menu = Menu;
+    Entry.Node = CanvasNode;
+    return Entry;
+}());
 
 export default Entry;

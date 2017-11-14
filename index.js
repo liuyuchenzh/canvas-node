@@ -510,6 +510,14 @@ var Manager = (function () {
     return Manager;
 }());
 
+var Menu = (function (_super) {
+    __extends(Menu, _super);
+    function Menu(option) {
+        return _super.call(this, option) || this;
+    }
+    return Menu;
+}(CanvasNode));
+
 var EventManager = (function () {
     function EventManager() {
     }
@@ -710,6 +718,10 @@ var Entry = (function () {
     Entry.getClickedLine = getClickedLine;
     Entry.centralizePoint = centralizePoint;
     Entry.placePointOnEdge = placePointOnEdge;
+    Entry.ArrowNode = ArrowNode;
+    Entry.Box = Box;
+    Entry.Menu = Menu;
+    Entry.Node = CanvasNode;
     return Entry;
 }());
 

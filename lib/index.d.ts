@@ -1,6 +1,7 @@
 import { ManagerOption } from './manager';
-import { CanvasNodeOption, Pos } from './node';
+import { CanvasNode, CanvasNodeOption, Pos } from './node';
 import { Box } from './box';
+import { Menu } from './menu';
 import { Cb } from './helpers/nativeToNodeEvent';
 import { ArrowNode } from './arrow';
 import { addEvent, removeEvent } from './helpers/eventHelper';
@@ -20,5 +21,9 @@ declare class Entry {
     static getClickedLine: typeof getClickedLine;
     static centralizePoint: typeof centralizePoint;
     static placePointOnEdge: typeof placePointOnEdge;
+    static ArrowNode: typeof ArrowNode;
+    static Box: typeof Box;
+    static Menu: typeof Menu;
+    static Node: typeof CanvasNode;
 }
 export { Entry as default };

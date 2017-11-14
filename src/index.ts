@@ -1,6 +1,7 @@
 import { Manager, ManagerOption } from './manager'
-import { CanvasNodeOption, Pos } from './node'
+import { CanvasNode, CanvasNodeOption, Pos } from './node'
 import { Box } from './box'
+import { Menu } from './menu'
 import {
   listenToNodeEvent,
   removeNodeEvent,
@@ -52,6 +53,10 @@ class Entry {
   static getClickedLine = getClickedLine
   static centralizePoint = centralizePoint
   static placePointOnEdge = placePointOnEdge
+  static ArrowNode = ArrowNode
+  static Box = Box
+  static Menu = Menu
+  static Node = CanvasNode
 }
 
 export { Entry as default }

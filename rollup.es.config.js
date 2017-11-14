@@ -8,13 +8,7 @@ module.exports = {
       browser: true
     }),
     commonjs(),
-    ts({
-      tsconfigOverride: {
-        compilerOptions: {
-          target: 'es6'
-        }
-      }
-    })
+    ts()
   ],
   output: {
     file: 'index_es.js',
