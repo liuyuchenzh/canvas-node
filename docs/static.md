@@ -32,7 +32,7 @@ CanvasNode.init({
   - [font] `<string>`: font style of the text.
   - [drawCb] `<function>`: custom callback for extra drawing.
 
-return `<Box>`
+return `<CanvasNode>`
 
 ## CanvasNode.drawLine(from [, to])
 
@@ -44,8 +44,8 @@ return `<ArrowNode>`
 ## CanvasNode.connect(line, fromBox, toBox)
 
 - line `<ArrowNode>`
-- fromBox `<Box>`
-- toBox `<Box>`
+- fromBox `<CanvasNode>`
+- toBox `<CanvasNode>`
 
 ## CanvasNode.addEvent(type, cb)
 
@@ -75,11 +75,6 @@ CanvasNode.addEvent('mouseover', node => {
 - type `<string>`: type of native event wish to stop listening to.
 - [handler] `<function(event)>`: specific handler to be removed. If not provided, all handlers registered by `CanvasNode.nativeAddEvent` for such type of event will be removed.
 
-## CanvasNode.getClickedBox(position)
-
-- position `{object}`: clicked position in form of `{x: number, y: number}`.
-
-return `Box`
 
 ## CavansNode.getClickedLine(position)
 
@@ -87,15 +82,15 @@ return `Box`
 
 return `ArrowNode`
 
-## CanvasNode.centralizePoint(box)
+## CanvasNode.centralizePoint(node)
 
-- box `<Box>`: the center point of which will be returned.
+- node `<CanvasNode>`: the center point of which will be returned.
 
 return `{x: number, y: number}`
 
-## CanvasNode.placePointOnEdge(startPos, endPos, box [, isStart])
+## CanvasNode.placePointOnEdge(startPos, endPos, node [, isStart])
 
 - startPos `<object>`: start point position.
 - endPos `<object>`: end point position.
-- box `<Box>`: of which the point will be placed on.
+- node `<CanvasNode>`: of which the point will be placed on.
 - [isStart]: if the point is starting point, default `true`.
