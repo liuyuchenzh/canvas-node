@@ -15,11 +15,11 @@
   "devDependencies": {
     "@types/point-in-polygon": "^1.0.0",
     "point-in-polygon": "^1.0.1",
-    "rollup": "^0.50.0",
+    "rollup": "^0.51.5",
     "rollup-plugin-commonjs": "^8.2.5",
     "rollup-plugin-node-resolve": "^3.0.0",
-    "rollup-plugin-typescript2": "^0.7.0",
-    "typescript": "^2.5.3"
+    "rollup-plugin-typescript2": "^0.8.0",
+    "typescript": "^2.6.0"
   },
   "scripts": {
     "dev": "rollup -c -w",

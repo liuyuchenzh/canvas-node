@@ -1,6 +1,5 @@
 import { CanvasNode, Pos } from '../node'
 import { ArrowNode } from '../arrow'
-import { Box } from '../box'
 import pointInPolygon from 'point-in-polygon'
 import { Manager } from '../manager'
 
@@ -128,18 +127,6 @@ export function getClickedNode(pos: Pos): CanvasNode {
     if (node instanceof ArrowNode) {
       return isPointOnCurve(node.stops, pos)
     }
-    if (!node.vertexes) return false
-    return isPointInPolygon(node.vertexes, pos)
-  })
-}
-
-/**
- * get the clicked Box or undefined
- * @param {Pos} pos
- * @returns {Box}
- */
-export function getClickedBox(pos: Pos): Box {
-  return Manager.list.filter(node => node instanceof Box).find(node => {
     if (!node.vertexes) return false
     return isPointInPolygon(node.vertexes, pos)
   })

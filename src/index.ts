@@ -1,6 +1,5 @@
 import { Manager, ManagerOption } from './manager'
 import { CanvasNode, CanvasNodeOption, Pos } from './node'
-import { Box } from './box'
 import { Menu } from './menu'
 import {
   listenToNodeEvent,
@@ -10,7 +9,6 @@ import {
 import { ArrowNode } from './arrow'
 import { addEvent, removeEvent } from './helpers/eventHelper'
 import {
-  getClickedBox,
   getClickedNode,
   getClickedLine
 } from './helpers/isClicked'
@@ -22,7 +20,7 @@ class Entry {
   }
 
   static drawBox(option: CanvasNodeOption) {
-    return new Box(option)
+    return new CanvasNode(option)
   }
 
   static addEvent(type: string, cb: Cb) {
@@ -42,19 +40,17 @@ class Entry {
     return line
   }
 
-  static connect(line: ArrowNode, from: Box, to: Box) {
+  static connect(line: ArrowNode, from: CanvasNode, to: CanvasNode) {
     line.connect(from, to)
   }
 
   static nativeAddEvent = addEvent
   static nativeRemoveEvent = removeEvent
-  static getClickedBox = getClickedBox
   static getClickedNode = getClickedNode
   static getClickedLine = getClickedLine
   static centralizePoint = centralizePoint
   static placePointOnEdge = placePointOnEdge
   static ArrowNode = ArrowNode
-  static Box = Box
   static Menu = Menu
   static Node = CanvasNode
 }

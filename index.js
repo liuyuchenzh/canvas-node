@@ -36,14 +36,7 @@ function getVertexesForRect(raw) {
     var x = raw[0], y = raw[1], w = raw[2], h = raw[3];
     return [x, y, x + w, y, x + w, y + h, x, y + h];
 }
-
-var Box = (function (_super) {
-    __extends(Box, _super);
-    function Box(option) {
-        return _super.call(this, option) || this;
-    }
-    return Box;
-}(CanvasNode));
+//# sourceMappingURL=getVertexes.js.map
 
 var pointInPolygon = function (point, vs) {
     // ray-casting algorithm based on
@@ -125,18 +118,12 @@ function getClickedNode(pos) {
         return isPointInPolygon(node.vertexes, pos);
     });
 }
-function getClickedBox(pos) {
-    return Manager.list.filter(function (node) { return node instanceof Box; }).find(function (node) {
-        if (!node.vertexes)
-            return false;
-        return isPointInPolygon(node.vertexes, pos);
-    });
-}
 function getClickedLine(pos) {
     return Manager.list
         .filter(function (node) { return node instanceof ArrowNode; })
         .find(function (node) { return isPointOnCurve(node.stops, pos); });
 }
+//# sourceMappingURL=isClicked.js.map
 
 var MARGIN_ERROR = 5;
 function drawTriangle() {
@@ -273,6 +260,7 @@ function calculatePos(dir, node) {
         y: y
     };
 }
+//# sourceMappingURL=drawArrow.js.map
 
 function defaultData() {
     return {
@@ -395,6 +383,8 @@ var CanvasNode = (function () {
     return CanvasNode;
 }());
 
+//# sourceMappingURL=node.js.map
+
 function getDefaultOption() {
     return {
         ratio: 0.5
@@ -437,6 +427,8 @@ var ArrowNode = (function (_super) {
     };
     return ArrowNode;
 }(CanvasNode));
+
+//# sourceMappingURL=arrow.js.map
 
 var Manager = (function () {
     function Manager() {
@@ -510,6 +502,8 @@ var Manager = (function () {
     return Manager;
 }());
 
+//# sourceMappingURL=manager.js.map
+
 var Menu = (function (_super) {
     __extends(Menu, _super);
     function Menu(option) {
@@ -517,6 +511,8 @@ var Menu = (function (_super) {
     }
     return Menu;
 }(CanvasNode));
+
+//# sourceMappingURL=menu.js.map
 
 var EventManager = (function () {
     function EventManager() {
@@ -565,6 +561,7 @@ function addEvent(el, type, cb) {
 function removeEvent(el, type, cb) {
     EventManager.remove(el, type, cb);
 }
+//# sourceMappingURL=eventHelper.js.map
 
 var NORMALIZE_LIST = ['mousemove', 'mouseout'];
 var target;
@@ -612,6 +609,7 @@ function generateMouseOutHandler(cb) {
         target = null;
     };
 }
+//# sourceMappingURL=normalizeNodeEvent.js.map
 
 var NodeEventManager = (function () {
     function NodeEventManager() {
@@ -684,6 +682,7 @@ function removeNodeEvent(type, cb) {
         NodeEventManager.remove(type);
     }
 }
+//# sourceMappingURL=nativeToNodeEvent.js.map
 
 var Entry = (function () {
     function Entry() {
@@ -692,7 +691,7 @@ var Entry = (function () {
         Manager.init(option);
     };
     Entry.drawBox = function (option) {
-        return new Box(option);
+        return new CanvasNode(option);
     };
     Entry.addEvent = function (type, cb) {
         listenToNodeEvent(type, cb);
@@ -713,13 +712,11 @@ var Entry = (function () {
     };
     Entry.nativeAddEvent = addEvent;
     Entry.nativeRemoveEvent = removeEvent;
-    Entry.getClickedBox = getClickedBox;
     Entry.getClickedNode = getClickedNode;
     Entry.getClickedLine = getClickedLine;
     Entry.centralizePoint = centralizePoint;
     Entry.placePointOnEdge = placePointOnEdge;
     Entry.ArrowNode = ArrowNode;
-    Entry.Box = Box;
     Entry.Menu = Menu;
     Entry.Node = CanvasNode;
     return Entry;
