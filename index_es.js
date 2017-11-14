@@ -31,14 +31,6 @@ function getVertexesForRect(raw) {
     return [x, y, x + w, y, x + w, y + h, x, y + h];
 }
 
-var Box = (function (_super) {
-    __extends(Box, _super);
-    function Box(option) {
-        return _super.call(this, option) || this;
-    }
-    return Box;
-}(CanvasNode));
-
 var pointInPolygon = function (point, vs) {
     // ray-casting algorithm based on
     // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
@@ -114,13 +106,6 @@ function getClickedNode(pos) {
         if (node instanceof ArrowNode) {
             return isPointOnCurve(node.stops, pos);
         }
-        if (!node.vertexes)
-            return false;
-        return isPointInPolygon(node.vertexes, pos);
-    });
-}
-function getClickedBox(pos) {
-    return Manager.list.filter(function (node) { return node instanceof Box; }).find(function (node) {
         if (!node.vertexes)
             return false;
         return isPointInPolygon(node.vertexes, pos);
@@ -686,7 +671,7 @@ var Entry = (function () {
         Manager.init(option);
     };
     Entry.drawBox = function (option) {
-        return new Box(option);
+        return new CanvasNode(option);
     };
     Entry.addEvent = function (type, cb) {
         listenToNodeEvent(type, cb);
@@ -707,13 +692,11 @@ var Entry = (function () {
     };
     Entry.nativeAddEvent = addEvent;
     Entry.nativeRemoveEvent = removeEvent;
-    Entry.getClickedBox = getClickedBox;
     Entry.getClickedNode = getClickedNode;
     Entry.getClickedLine = getClickedLine;
     Entry.centralizePoint = centralizePoint;
     Entry.placePointOnEdge = placePointOnEdge;
     Entry.ArrowNode = ArrowNode;
-    Entry.Box = Box;
     Entry.Menu = Menu;
     Entry.Node = CanvasNode;
     return Entry;
