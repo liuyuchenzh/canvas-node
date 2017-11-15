@@ -39,7 +39,7 @@ function normalizeEndPoint(startPoint: number, endPoint: number) {
  * get direction of the arrow (for end point)
  * @param {Pos} start
  * @param {Pos} end
- * @returns {string}
+ * @returns {string}: for the end, which direction it is on from start
  */
 function getDirection(start: Pos, end: Pos): string {
   const { x: startX, y: startY } = start
@@ -57,7 +57,7 @@ function getDirection(start: Pos, end: Pos): string {
  * get direction for start point
  * @param {Pos} start
  * @param {Pos} end
- * @returns {string}
+ * @returns {string}: for the start, which direction it is on from the end
  */
 function getDirectionForStart(start: Pos, end: Pos): string {
   const dir: string = getDirection(start, end)
@@ -67,15 +67,15 @@ function getDirectionForStart(start: Pos, end: Pos): string {
     case 'top':
     case 'bottom':
       if (withInMargin(startX - endX)) {
-        return endY > startY ? 'bottom' : 'top'
+        return endY > startY ? 'top' : 'bottom'
       }
-      return endX > startX ? 'right' : 'left'
+      return endX > startX ? 'left' : 'right'
     case 'left':
     case 'right':
       if (withInMargin(startY - endY)) {
-        return endX > startX ? 'right' : 'left'
+        return endX > startX ? 'left' : 'right'
       }
-      return endY > startY ? 'bottom' : 'top'
+      return endY > startY ? 'top' : 'bottom'
   }
 }
 
@@ -157,8 +157,18 @@ export function drawLine(
   const arrowX: number = simulateCurve(startX, stop[0], $endX, fixRatio(ratio))
   const arrowY: number = simulateCurve(startY, stop[1], $endY, fixRatio(ratio))
   // calculate tan
-  const arrowDirX: number = getDirective(startX, stop[0], $endX, fixRatio(ratio))
-  const arrowDirY: number = getDirective(startY, stop[1], $endY, fixRatio(ratio))
+  const arrowDirX: number = getDirective(
+    startX,
+    stop[0],
+    $endX,
+    fixRatio(ratio)
+  )
+  const arrowDirY: number = getDirective(
+    startY,
+    stop[1],
+    $endY,
+    fixRatio(ratio)
+  )
   const tan: number = arrowDirY / arrowDirX
   // get rotate angle
   const angle: number = Math.atan(tan)
@@ -173,7 +183,7 @@ export function drawLine(
   const triangle = drawTriangle()
   ctx.fillStyle = style
   // use custom arrow path or default one
-  ctx.fill(arrowPath as CanvasFillRule|| triangle as CanvasFillRule)
+  ctx.fill((arrowPath as CanvasFillRule) || (triangle as CanvasFillRule))
   ctx.restore()
 }
 
@@ -212,7 +222,7 @@ export function placePointOnEdge(
 
 /**
  * given direction and targeted node, get the coordinate of point on edge
- * @param {string} dir
+ * @param {string} dir: for the perspective of the end, which direction it is on for the start
  * @param {CanvasNode} node
  * @returns {Pos}
  */
@@ -221,19 +231,19 @@ function calculatePos(dir: string, node: CanvasNode): Pos {
   let x: number
   let y: number
   switch (dir) {
-    case 'top':
+    case 'bottom':
       x = node.pos.x + width / 2
       y = node.pos.y
       break
-    case 'bottom':
+    case 'top':
       x = node.pos.x + width / 2
       y = node.pos.y + height
       break
-    case 'left':
+    case 'right':
       x = node.pos.x
       y = node.pos.y + height / 2
       break
-    case 'right':
+    case 'left':
       x = node.pos.x + width
       y = node.pos.y + height / 2
       break

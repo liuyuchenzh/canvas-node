@@ -17,7 +17,10 @@ export function shouldNormalizeEvent(type: string) {
   return NORMALIZE_LIST.includes(type)
 }
 
-export function normalizeEvent(type: string, cb: NodeEventCallback): EventHandler {
+export function normalizeEvent(
+  type: string,
+  cb: NodeEventCallback
+): EventHandler {
   switch (type) {
     case 'mousemove':
       return generateMouseMoveHandler(cb)

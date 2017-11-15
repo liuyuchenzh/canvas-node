@@ -161,15 +161,15 @@ function getDirectionForStart(start, end) {
         case 'top':
         case 'bottom':
             if (withInMargin(startX - endX)) {
-                return endY > startY ? 'bottom' : 'top';
+                return endY > startY ? 'top' : 'bottom';
             }
-            return endX > startX ? 'right' : 'left';
+            return endX > startX ? 'left' : 'right';
         case 'left':
         case 'right':
             if (withInMargin(startY - endY)) {
-                return endX > startX ? 'right' : 'left';
+                return endX > startX ? 'left' : 'right';
             }
-            return endY > startY ? 'bottom' : 'top';
+            return endY > startY ? 'top' : 'bottom';
     }
 }
 function calculateStop(x1, y1, x2, y2) {
@@ -242,19 +242,19 @@ function calculatePos(dir, node) {
     var x;
     var y;
     switch (dir) {
-        case 'top':
+        case 'bottom':
             x = node.pos.x + width / 2;
             y = node.pos.y;
             break;
-        case 'bottom':
+        case 'top':
             x = node.pos.x + width / 2;
             y = node.pos.y + height;
             break;
-        case 'left':
+        case 'right':
             x = node.pos.x;
             y = node.pos.y + height / 2;
             break;
-        case 'right':
+        case 'left':
             x = node.pos.x + width;
             y = node.pos.y + height / 2;
             break;
