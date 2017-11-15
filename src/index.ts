@@ -1,17 +1,10 @@
 import { Manager, ManagerOption } from './manager'
-import { CanvasNode, CanvasNodeOption, Pos } from './node'
+import { CanvasNode, CanvasNodeOption, Pos, NodeEventCallback } from './node'
 import { Menu } from './menu'
-import {
-  listenToNodeEvent,
-  removeNodeEvent,
-  Cb
-} from './helpers/nativeToNodeEvent'
+import { listenToNodeEvent, removeNodeEvent } from './helpers/nativeToNodeEvent'
 import { ArrowNode } from './arrow'
 import { addEvent, removeEvent } from './helpers/eventHelper'
-import {
-  getClickedNode,
-  getClickedLine
-} from './helpers/isClicked'
+import { getClickedNode, getClickedLine } from './helpers/isClicked'
 import { centralizePoint, placePointOnEdge } from './helpers/drawArrow'
 
 class Entry {
@@ -23,7 +16,7 @@ class Entry {
     return new CanvasNode(option)
   }
 
-  static addEvent(type: string, cb: Cb) {
+  static addEvent(type: string, cb: NodeEventCallback) {
     listenToNodeEvent(type, cb)
   }
 

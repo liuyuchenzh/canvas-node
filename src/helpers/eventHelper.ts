@@ -1,3 +1,4 @@
+import { inheritTag, isSameFn } from './tagFn'
 export type El = Element | Document
 
 interface EventItem {
@@ -9,7 +10,7 @@ interface EventItem {
 class EventManager {
   static list: EventItem[] = []
 
-  static add (el: El, type: string, cb: (e: Event) => any) {
+  static add(el: El, type: string, cb: (e: Event) => any) {
     let item: EventItem = findEventItem(el, type)
     if (!item) {
       item = {
@@ -22,25 +23,27 @@ class EventManager {
     this.list.push(item)
   }
 
-  static remove (el: El, type: string, cb?: (e: Event) => any) {
+  static remove(el: El, type: string, cb?: (e: Event) => any) {
     const item: EventItem = findEventItem(el, type)
     if (!item) return
     if (!cb) {
       item.cbs = []
     } else {
-      item.cbs = item.cbs.filter(oldCb => oldCb !== cb)
+      console.log('before', item.cbs.length)
+      item.cbs = item.cbs.filter(oldCb => isSameFn(oldCb, cb))
+      console.log('after', item.cbs.length)
     }
   }
 }
 
-function findEventItem (el: El, type: string): EventItem {
+function findEventItem(el: El, type: string): EventItem {
   return EventManager.list.find(item => item.el === el && item.type === type)
 }
 
-export function addEvent (el: El, type: string, cb: (e: Event) => any) {
+export function addEvent(el: El, type: string, cb: (e: Event) => any) {
   const item: EventItem = findEventItem(el, type)
   if (!item) {
-    el.addEventListener(type, function handler (e: Event) {
+    el.addEventListener(type, function handler(e: Event) {
       const cbs = findEventItem(el, type).cbs
       cbs.forEach(cb => {
         cb(e)
@@ -50,6 +53,6 @@ export function addEvent (el: El, type: string, cb: (e: Event) => any) {
   EventManager.add(el, type, cb)
 }
 
-export function removeEvent (el: El, type: string, cb?: (e: Event) => any) {
+export function removeEvent(el: El, type: string, cb?: (e: Event) => any) {
   EventManager.remove(el, type, cb)
 }

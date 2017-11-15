@@ -8,7 +8,8 @@ export declare type y = number;
 export declare type width = number;
 export declare type height = number;
 export declare type RawVertexes = [x, y, width, height];
-export declare type DrawCb = (node: CanvasNode) => any;
+export declare type Callback = (node: CanvasNode) => any;
+export declare type NodeEventCallback = (e: Event, node: CanvasNode) => any;
 export interface CanvasNodeOption {
     name: string;
     path?: Path2D;
@@ -18,9 +19,10 @@ export interface CanvasNodeOption {
     size?: Pos;
     style?: string;
     strokeStyle?: string;
+    color?: string;
     font?: string;
     text?: string;
-    drawCb?: DrawCb;
+    drawCb?: Callback;
     rawVertexes?: RawVertexes;
 }
 export declare class CanvasNode implements CanvasNodeOption {
@@ -33,11 +35,14 @@ export declare class CanvasNode implements CanvasNodeOption {
     size: Pos;
     style: string;
     strokeStyle: string;
+    color: string;
     text: string;
-    drawCbs: DrawCb[];
+    drawCbs: Callback[];
     rawVertexes: RawVertexes;
     lines: ArrowNode[];
+    private autoUpdateFields;
     constructor(option: CanvasNodeOption);
+    proxy(): void;
     readonly vertexes: number[];
     moveTo(pos: Pos): void;
     $moveTo(pos: Pos): void;
@@ -53,5 +58,7 @@ export declare class CanvasNode implements CanvasNodeOption {
     updateLinePos(): void;
     remove(node?: CanvasNode): void;
     forEach(fn: (node: CanvasNode, i: number, list: CanvasNode[]) => any): void;
-    addDrawCb(cb: DrawCb): void;
+    addDrawCb(cb: Callback): void;
+    hover(inCb: NodeEventCallback, outCb?: NodeEventCallback): void;
+    click(clickCb: NodeEventCallback): void;
 }

@@ -82,7 +82,12 @@ export function isPointOnCurve(poly: Poly, pos: Pos): boolean {
  * @param {number} t
  * @returns {number}
  */
-export function simulateCurve(p0: number, p1: number, p2: number, t: number): number {
+export function simulateCurve(
+  p0: number,
+  p1: number,
+  p2: number,
+  t: number
+): number {
   return Math.pow(1 - t, 2) * p0 + 2 * (1 - t) * t * p1 + Math.pow(t, 2) * p2
 }
 
@@ -94,7 +99,12 @@ export function simulateCurve(p0: number, p1: number, p2: number, t: number): nu
  * @param {number} t
  * @returns {number}
  */
-export function getDirective(p0: number, p1: number, p2: number, t: number): number {
+export function getDirective(
+  p0: number,
+  p1: number,
+  p2: number,
+  t: number
+): number {
   return 2 * (1 - t) * (p1 - p0) + 2 * t * (p2 - p1)
 }
 

@@ -1,7 +1,6 @@
 import { ManagerOption } from './manager';
-import { CanvasNode, CanvasNodeOption, Pos } from './node';
+import { CanvasNode, CanvasNodeOption, Pos, NodeEventCallback } from './node';
 import { Menu } from './menu';
-import { Cb } from './helpers/nativeToNodeEvent';
 import { ArrowNode } from './arrow';
 import { addEvent, removeEvent } from './helpers/eventHelper';
 import { getClickedNode, getClickedLine } from './helpers/isClicked';
@@ -9,7 +8,7 @@ import { centralizePoint, placePointOnEdge } from './helpers/drawArrow';
 declare class Entry {
     static init(option: ManagerOption): void;
     static drawBox(option: CanvasNodeOption): CanvasNode;
-    static addEvent(type: string, cb: Cb): void;
+    static addEvent(type: string, cb: NodeEventCallback): void;
     static removeEvent(type: string): void;
     static drawLine(from: Pos, to?: Pos): ArrowNode;
     static connect(line: ArrowNode, from: CanvasNode, to: CanvasNode): void;

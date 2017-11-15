@@ -253,11 +253,179 @@ function calculatePos(dir, node) {
     };
 }
 
+var EventManager = (function () {
+    function EventManager() {
+    }
+    EventManager.add = function (el, type, cb) {
+        var item = findEventItem(el, type);
+        if (!item) {
+            item = {
+                el: el,
+                type: type,
+                cbs: []
+            };
+        }
+        item.cbs.push(cb);
+        this.list.push(item);
+    };
+    EventManager.remove = function (el, type, cb) {
+        var item = findEventItem(el, type);
+        if (!item)
+            return;
+        if (!cb) {
+            item.cbs = [];
+        }
+        else {
+            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
+        }
+    };
+    EventManager.list = [];
+    return EventManager;
+}());
+function findEventItem(el, type) {
+    return EventManager.list.find(function (item) { return item.el === el && item.type === type; });
+}
+function addEvent(el, type, cb) {
+    var item = findEventItem(el, type);
+    if (!item) {
+        el.addEventListener(type, function handler(e) {
+            var cbs = findEventItem(el, type).cbs;
+            cbs.forEach(function (cb) {
+                cb(e);
+            });
+        });
+    }
+    EventManager.add(el, type, cb);
+}
+function removeEvent(el, type, cb) {
+    EventManager.remove(el, type, cb);
+}
+
+var NORMALIZE_LIST = ['mousemove', 'mouseout'];
+var target;
+function shouldNormalizeEvent(type) {
+    return NORMALIZE_LIST.includes(type);
+}
+function normalizeEvent(type, cb) {
+    switch (type) {
+        case 'mousemove':
+            return generateMouseMoveHandler(cb);
+        case 'mouseout':
+            return generateMouseOutHandler(cb);
+    }
+}
+function normalizeEventType(type) {
+    if (type === 'mouseout')
+        return 'mousemove';
+    return type;
+}
+function generateMouseMoveHandler(cb) {
+    return function handler(e) {
+        var pos = {
+            x: e.offsetX,
+            y: e.offsetY
+        };
+        var node = getClickedNode(pos);
+        if (!node)
+            return;
+        target = node;
+        cb(e, node);
+    };
+}
+function generateMouseOutHandler(cb) {
+    return function handler(e) {
+        var pos = {
+            x: e.offsetX,
+            y: e.offsetY
+        };
+        var node = getClickedNode(pos);
+        if (node === target)
+            return;
+        if (!target)
+            return;
+        cb(e, target);
+        target = null;
+    };
+}
+
+var NodeEventManager = (function () {
+    function NodeEventManager() {
+    }
+    NodeEventManager.add = function (type, cb) {
+        var item = this.getItem(type);
+        if (!item) {
+            item = {
+                type: type,
+                cbs: [cb]
+            };
+            this.list.push(item);
+        }
+        else {
+            item.cbs.push(cb);
+        }
+    };
+    NodeEventManager.getCbs = function (type) {
+        return this.getItem(type).cbs;
+    };
+    NodeEventManager.getItem = function (type) {
+        return this.list.find(function (item) { return item.type === type; });
+    };
+    NodeEventManager.remove = function (type, cb) {
+        if (!cb) {
+            this.list = this.list.filter(function (item) { return item.type !== type; });
+        }
+        else {
+            var item = this.getItem(type);
+            if (!item)
+                return;
+            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
+        }
+    };
+    NodeEventManager.list = [];
+    return NodeEventManager;
+}());
+function listenToNodeEvent(type, cb) {
+    var $type = normalizeEventType(type);
+    var fn;
+    if (shouldNormalizeEvent(type)) {
+        fn = normalizeEvent(type, cb);
+    }
+    else {
+        fn = eventHandler;
+    }
+    function eventHandler(e) {
+        var pos = {
+            x: e.offsetX,
+            y: e.offsetY
+        };
+        var target = getClickedNode(pos);
+        if (!target)
+            return;
+        cb(e, target);
+    }
+    addEvent(Manager.canvas, $type, fn);
+    NodeEventManager.add(type, fn);
+}
+function removeNodeEvent(type, cb) {
+    var $type = normalizeEventType(type);
+    if (cb) {
+        removeEvent(Manager.canvas, $type, cb);
+        NodeEventManager.remove(type, cb);
+    }
+    else {
+        NodeEventManager.getCbs(type).forEach(function (cb) {
+            removeEvent(Manager.canvas, $type, cb);
+        });
+        NodeEventManager.remove(type);
+    }
+}
+
 function defaultData() {
     return {
         font: '14px Arial',
         style: '#fff',
         strokeStyle: '#000',
+        color: '#000',
         data: {}
     };
 }
@@ -265,6 +433,15 @@ var CanvasNode = (function () {
     function CanvasNode(option) {
         this.drawCbs = [];
         this.lines = [];
+        this.autoUpdateFields = [
+            'font',
+            'size',
+            'style',
+            'strokeStyle',
+            'color',
+            'text'
+        ];
+        this.proxy();
         Object.assign(this, defaultData(), option, {
             ctx: Manager.ctx,
             size: Manager.size
@@ -272,6 +449,21 @@ var CanvasNode = (function () {
         this.$moveTo(this.pos);
         Manager.add(this);
     }
+    CanvasNode.prototype.proxy = function () {
+        var _this = this;
+        this.autoUpdateFields.forEach(function (key) {
+            console.log(key);
+            Object.defineProperty(_this, key, {
+                get: function () {
+                    return this['$' + key];
+                },
+                set: function (val) {
+                    this['$' + key] = val;
+                    console.log('in set');
+                }
+            });
+        });
+    };
     Object.defineProperty(CanvasNode.prototype, "vertexes", {
         get: function () {
             var _this = this;
@@ -332,7 +524,7 @@ var CanvasNode = (function () {
         this.ctx.textBaseline = 'middle';
         this.ctx.save();
         this.ctx.translate(width / 2, height / 2);
-        this.ctx.fillStyle = '#000';
+        this.ctx.fillStyle = this.color || '#000';
         this.ctx.fillText($text, 0, 0);
         this.updateText($text);
         this.ctx.restore();
@@ -370,6 +562,29 @@ var CanvasNode = (function () {
     };
     CanvasNode.prototype.addDrawCb = function (cb) {
         this.drawCbs.push(cb);
+    };
+    CanvasNode.prototype.hover = function (inCb, outCb) {
+        var _this = this;
+        listenToNodeEvent('mousemove', function (e, node) {
+            if (node !== _this)
+                return;
+            inCb(e, node);
+        });
+        if (!outCb)
+            return;
+        listenToNodeEvent('mouseout', function (e, node) {
+            if (node !== _this)
+                return;
+            outCb(e, node);
+        });
+    };
+    CanvasNode.prototype.click = function (clickCb) {
+        var _this = this;
+        listenToNodeEvent('click', function (e, node) {
+            if (node !== _this)
+                return;
+            clickCb(e, node);
+        });
     };
     return CanvasNode;
 }());
@@ -496,173 +711,6 @@ var Menu = (function (_super) {
     }
     return Menu;
 }(CanvasNode));
-
-var EventManager = (function () {
-    function EventManager() {
-    }
-    EventManager.add = function (el, type, cb) {
-        var item = findEventItem(el, type);
-        if (!item) {
-            item = {
-                el: el,
-                type: type,
-                cbs: []
-            };
-        }
-        item.cbs.push(cb);
-        this.list.push(item);
-    };
-    EventManager.remove = function (el, type, cb) {
-        var item = findEventItem(el, type);
-        if (!item)
-            return;
-        if (!cb) {
-            item.cbs = [];
-        }
-        else {
-            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
-        }
-    };
-    EventManager.list = [];
-    return EventManager;
-}());
-function findEventItem(el, type) {
-    return EventManager.list.find(function (item) { return item.el === el && item.type === type; });
-}
-function addEvent(el, type, cb) {
-    var item = findEventItem(el, type);
-    if (!item) {
-        el.addEventListener(type, function handler(e) {
-            var cbs = findEventItem(el, type).cbs;
-            cbs.forEach(function (cb) {
-                cb(e);
-            });
-        });
-    }
-    EventManager.add(el, type, cb);
-}
-function removeEvent(el, type, cb) {
-    EventManager.remove(el, type, cb);
-}
-
-var NORMALIZE_LIST = ['mousemove', 'mouseout'];
-var target;
-function shouldNormalizeEvent(type) {
-    return NORMALIZE_LIST.includes(type);
-}
-function normalizeEvent(type, cb) {
-    switch (type) {
-        case 'mousemove':
-            return generateMouseMoveHandler(cb);
-        case 'mouseout':
-            return generateMouseOutHandler(cb);
-    }
-}
-function normalizeEventType(type) {
-    if (type === 'mouseout')
-        return 'mousemove';
-    return type;
-}
-function generateMouseMoveHandler(cb) {
-    return function handler(e) {
-        var pos = {
-            x: e.offsetX,
-            y: e.offsetY
-        };
-        var node = getClickedNode(pos);
-        if (!node)
-            return;
-        target = node;
-        cb(node);
-    };
-}
-function generateMouseOutHandler(cb) {
-    return function handler(e) {
-        var pos = {
-            x: e.offsetX,
-            y: e.offsetY
-        };
-        var node = getClickedNode(pos);
-        if (node === target)
-            return;
-        if (!target)
-            return;
-        cb(target);
-        target = null;
-    };
-}
-
-var NodeEventManager = (function () {
-    function NodeEventManager() {
-    }
-    NodeEventManager.add = function (type, cb) {
-        var item = this.getItem(type);
-        if (!item) {
-            item = {
-                type: type,
-                cbs: [cb]
-            };
-            this.list.push(item);
-        }
-        else {
-            item.cbs.push(cb);
-        }
-    };
-    NodeEventManager.getCbs = function (type) {
-        return this.getItem(type).cbs;
-    };
-    NodeEventManager.getItem = function (type) {
-        return this.list.find(function (item) { return item.type === type; });
-    };
-    NodeEventManager.remove = function (type, cb) {
-        if (!cb) {
-            this.list = this.list.filter(function (item) { return item.type !== type; });
-        }
-        else {
-            var item = this.getItem(type);
-            if (!item)
-                return;
-            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
-        }
-    };
-    NodeEventManager.list = [];
-    return NodeEventManager;
-}());
-function listenToNodeEvent(type, cb) {
-    var $type = normalizeEventType(type);
-    var fn;
-    if (shouldNormalizeEvent(type)) {
-        fn = normalizeEvent(type, cb);
-    }
-    else {
-        fn = eventHandler;
-    }
-    function eventHandler(e) {
-        var pos = {
-            x: e.offsetX,
-            y: e.offsetY
-        };
-        var target = getClickedNode(pos);
-        if (!target)
-            return;
-        cb(target);
-    }
-    addEvent(Manager.canvas, $type, fn);
-    NodeEventManager.add(type, fn);
-}
-function removeNodeEvent(type, cb) {
-    var $type = normalizeEventType(type);
-    if (cb) {
-        removeEvent(Manager.canvas, $type, cb);
-        NodeEventManager.remove(type, cb);
-    }
-    else {
-        NodeEventManager.getCbs(type).forEach(function (cb) {
-            removeEvent(Manager.canvas, $type, cb);
-        });
-        NodeEventManager.remove(type);
-    }
-}
 
 var Entry = (function () {
     function Entry() {

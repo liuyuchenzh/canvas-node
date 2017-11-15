@@ -5,9 +5,8 @@
  * so 'not over' is just when stop 'over'
  * in other words, we are detecting when the current over 'target' is not the node which mouse was just 'over'
  */
-import { CanvasNode, Pos } from '../node'
+import { CanvasNode, Pos, NodeEventCallback } from '../node'
 import { getClickedNode } from './isClicked'
-import { Cb } from './nativeToNodeEvent'
 
 const NORMALIZE_LIST = ['mousemove', 'mouseout']
 let target: null | CanvasNode
@@ -18,7 +17,7 @@ export function shouldNormalizeEvent(type: string) {
   return NORMALIZE_LIST.includes(type)
 }
 
-export function normalizeEvent(type: string, cb: Cb): EventHandler {
+export function normalizeEvent(type: string, cb: NodeEventCallback): EventHandler {
   switch (type) {
     case 'mousemove':
       return generateMouseMoveHandler(cb)
@@ -32,7 +31,7 @@ export function normalizeEventType(type: string) {
   return type
 }
 
-function generateMouseMoveHandler(cb: Cb): EventHandler {
+function generateMouseMoveHandler(cb: NodeEventCallback): EventHandler {
   return function handler(e: MouseEvent) {
     const pos: Pos = {
       x: e.offsetX,
@@ -41,11 +40,11 @@ function generateMouseMoveHandler(cb: Cb): EventHandler {
     const node: CanvasNode = getClickedNode(pos)
     if (!node) return
     target = node
-    cb(node)
+    cb(e, node)
   }
 }
 
-function generateMouseOutHandler(cb: Cb): EventHandler {
+function generateMouseOutHandler(cb: NodeEventCallback): EventHandler {
   return function handler(e: MouseEvent) {
     const pos: Pos = {
       x: e.offsetX,
@@ -54,7 +53,7 @@ function generateMouseOutHandler(cb: Cb): EventHandler {
     const node: CanvasNode = getClickedNode(pos)
     if (node === target) return
     if (!target) return
-    cb(target)
+    cb(e, target)
     target = null
   }
 }

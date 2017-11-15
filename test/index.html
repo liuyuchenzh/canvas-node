@@ -38,6 +38,7 @@
       path,
       style: 'red',
       strokeStyle: '#000',
+      color: '#fff',
       pos: { x: 4, y: 342 }
     })
     const c = CanvasNode.drawBox({
@@ -57,6 +58,28 @@
       style: 'green',
       strokeStyle: 'green',
       pos: { x: 200, y: 100 }
+    })
+    const backColor = c2.color
+    const hoverColor = '#ccc'
+    c2.hover((e, node) => {
+      node.color = hoverColor
+      node.text = 'hover'
+    }, (e, node) => {
+      node.color = backColor
+      node.text = 'out'
+    })
+    c.click(() => {
+      console.log('clicked')
+    })
+    c.click(() => {
+      console.log('clicked from second callback')
+      setTimeout(() => {
+        c.destory()
+      }, 1000)
+    })
+    c.hover((e, node) => {
+      node.color = '#aaa'
+      // node.draw()
     })
     setTimeout(() => { c.moveTo({ x: 100, y: 100 }) }, 1000)
   </script>

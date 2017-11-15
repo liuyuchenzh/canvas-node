@@ -1,5 +1,5 @@
 import { addEvent, removeEvent } from './eventHelper'
-import { CanvasNode, Pos } from '../node'
+import { CanvasNode, Pos, NodeEventCallback } from '../node'
 import { Manager } from '../manager'
 import { getClickedNode } from './isClicked'
 import {
@@ -7,9 +7,9 @@ import {
   normalizeEvent,
   normalizeEventType
 } from './normalizeNodeEvent'
+import { inheritTag, isSameFn } from './tagFn'
 
-export type Cb = (node: CanvasNode) => any
-export type Handler = (input: any) => any
+export type Handler = (...args: any[]) => any
 
 interface NodeEventItem {
   type: string
@@ -53,12 +53,12 @@ class NodeEventManager {
     } else {
       const item: NodeEventItem = this.getItem(type)
       if (!item) return
-      item.cbs = item.cbs.filter(oldCb => oldCb !== cb)
+      item.cbs = item.cbs.filter(oldCb => isSameFn(oldCb, cb))
     }
   }
 }
 
-export function listenToNodeEvent(type: string, cb: Cb) {
+export function listenToNodeEvent(type: string, cb: NodeEventCallback) {
   const $type: string = normalizeEventType(type)
   let fn: Handler
   if (shouldNormalizeEvent(type)) {
@@ -74,8 +74,10 @@ export function listenToNodeEvent(type: string, cb: Cb) {
     }
     const target: CanvasNode = getClickedNode(pos)
     if (!target) return
-    cb(target)
+    cb(e, target)
   }
+  // inherit tag from cb
+  inheritTag(cb, fn)
 
   // listen to native event
   addEvent(Manager.canvas, $type, fn)
@@ -83,7 +85,10 @@ export function listenToNodeEvent(type: string, cb: Cb) {
   NodeEventManager.add(type, fn)
 }
 
-export function removeNodeEvent(type: string, cb?: Handler) {
+export function removeNodeEvent(
+  type: string,
+  cb?: NodeEventCallback & Handler
+) {
   const $type: string = normalizeEventType(type)
   if (cb) {
     // remove from native event listener

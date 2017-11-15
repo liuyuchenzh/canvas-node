@@ -2,6 +2,9 @@ import { Manager } from './manager'
 import { getVertexesForRect } from './helpers/getVertexes'
 import { ArrowNode } from './arrow'
 import { centralizePoint } from './helpers/drawArrow'
+import { listenToNodeEvent, removeNodeEvent } from './helpers/nativeToNodeEvent'
+import { Batch } from './helpers/batch'
+import { tagFn } from './helpers/tagFn'
 
 export interface Pos {
   x: number
@@ -14,7 +17,8 @@ export type width = number
 export type height = number
 export type RawVertexes = [x, y, width, height]
 
-export type DrawCb = (node: CanvasNode) => any
+export type Callback = (node: CanvasNode) => any
+export type NodeEventCallback = (e: Event, node: CanvasNode) => any
 
 export interface CanvasNodeOption {
   name: string
@@ -25,9 +29,10 @@ export interface CanvasNodeOption {
   size?: Pos
   style?: string
   strokeStyle?: string
+  color?: string
   font?: string
   text?: string
-  drawCb?: DrawCb
+  drawCb?: Callback
   rawVertexes?: RawVertexes
 }
 
@@ -36,6 +41,7 @@ function defaultData() {
     font: '14px Arial',
     style: '#fff',
     strokeStyle: '#000',
+    color: '#000',
     data: {}
   }
 }
@@ -50,12 +56,28 @@ export class CanvasNode implements CanvasNodeOption {
   size: Pos
   style: string
   strokeStyle: string
+  color: string
   text: string
-  drawCbs: DrawCb[] = []
+  drawCbs: Callback[] = []
   rawVertexes: RawVertexes
   lines: ArrowNode[] = []
 
+  // properties to be proxied
+  private autoUpdateFields: string[] = [
+    'font',
+    'size',
+    'style',
+    'strokeStyle',
+    'color',
+    'text'
+  ]
+
+  private hoverInCb: NodeEventCallback[] = []
+  private hoverOutCb: NodeEventCallback[] = []
+  private clickCb: NodeEventCallback[] = []
+
   constructor(option: CanvasNodeOption) {
+    this.proxy()
     Object.assign(this, defaultData(), option, {
       ctx: Manager.ctx,
       size: Manager.size
@@ -64,6 +86,27 @@ export class CanvasNode implements CanvasNodeOption {
     this.$moveTo(this.pos)
     // add instance to Manager to monitor
     Manager.add(this)
+  }
+
+  proxy() {
+    const inited = []
+    this.autoUpdateFields.forEach(key => {
+      Object.defineProperty(this, key, {
+        get() {
+          return this['$' + key]
+        },
+        set(val) {
+          this['$' + key] = val
+          if (!inited.includes(key)) {
+            return inited.push(key)
+          }
+          // auto update view
+          Batch.add(() => {
+            this.draw()
+          }, this)
+        }
+      })
+    })
   }
 
   get vertexes(): number[] {
@@ -139,7 +182,7 @@ export class CanvasNode implements CanvasNodeOption {
     this.ctx.textBaseline = 'middle'
     this.ctx.save()
     this.ctx.translate(width / 2, height / 2)
-    this.ctx.fillStyle = '#000'
+    this.ctx.fillStyle = this.color || '#000'
     this.ctx.fillText($text, 0, 0)
     this.updateText($text)
     this.ctx.restore()
@@ -180,7 +223,48 @@ export class CanvasNode implements CanvasNodeOption {
     Manager.list.forEach(fn)
   }
 
-  addDrawCb(cb: DrawCb) {
+  addDrawCb(cb: Callback) {
     this.drawCbs.push(cb)
+  }
+
+  hover(inCb: NodeEventCallback, outCb?: NodeEventCallback) {
+    const $inCb = (e, node) => {
+      if (node !== this) return
+      inCb(e, node)
+    }
+    tagFn($inCb)
+    listenToNodeEvent('mousemove', $inCb)
+    this.hoverInCb.push($inCb)
+    if (!outCb) return
+    const $outCb = (e, node) => {
+      if (node !== this) return
+      outCb(e, node)
+    }
+    tagFn($outCb)
+    listenToNodeEvent('mouseout', $outCb)
+    this.hoverOutCb.push($outCb)
+  }
+
+  click(clickCb: NodeEventCallback) {
+    const $clickCb = (e, node) => {
+      if (node !== this) return
+      clickCb(e, node)
+    }
+    tagFn($clickCb)
+    listenToNodeEvent('click', $clickCb)
+    this.clickCb.push($clickCb)
+  }
+
+  destory() {
+    this.remove()
+    this.hoverInCb.forEach(cb => {
+      removeNodeEvent('mousemove', cb)
+    })
+    this.hoverOutCb.forEach(cb => {
+      removeNodeEvent('mouseout', cb)
+    })
+    this.clickCb.forEach(cb => {
+      removeNodeEvent('click', cb)
+    })
   }
 }

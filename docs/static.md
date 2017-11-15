@@ -26,6 +26,7 @@ CanvasNode.init({
   - path `<Path2D>`: path for the box.
   - rawVertexes `<number[]>`: [x, y, width, height] of the box. More likely should be [0, 0, width, height].
   - [text] `<string>`: text to show.
+  - [color] `<string>`: color of the text
   - [data] `<any>`: any thing to bind with the box.
   - [style] `<string>`: fill style of the box.
   - [strokeStyle] `<string>`: stroke style of the box.
@@ -50,12 +51,13 @@ return `<ArrowNode>`
 ## CanvasNode.addEvent(type, cb)
 
 - type `<string>`: type of event to be listened to. Type name just like the native ones, like `click` etc.
-- cb `<function(node)>`: handler function.
+- cb `<function(event, node)>`: handler function.
+  - event `<Event>`: the native event object.
   - node `<CanvasNode>`: the target node that such event happening on.
 
 ```js
-CanvasNode.addEvent('mouseover', node => {
-  console.log(node) // when the cursor is over the node, this will execute
+CanvasNode.addEvent('mouseover', (e, node) => {
+  console.log(e, node) // when the cursor is over the node, this will execute
 })
 ```
 
@@ -75,7 +77,6 @@ CanvasNode.addEvent('mouseover', node => {
 - type `<string>`: type of native event wish to stop listening to.
 - [handler] `<function(event)>`: specific handler to be removed. If not provided, all handlers registered by `CanvasNode.nativeAddEvent` for such type of event will be removed.
 
-
 ## CavansNode.getClickedLine(position)
 
 - position `{object}`: clicked position in form of `{x: number, y: number}`.
@@ -94,3 +95,15 @@ return `{x: number, y: number}`
 - endPos `<object>`: end point position.
 - node `<CanvasNode>`: of which the point will be placed on.
 - [isStart]: if the point is starting point, default `true`.
+
+## CanvasNode.ArrowNode
+
+return the class of [`ArrowNode`](./line.md).
+
+## CanvasNode.Menu
+
+return the class of `Menu`, which is just a subclass of [`CanvasNode`](./canvasNode.md).
+
+## CanvasNode.Node
+
+return the class of [`CanvasNode`](./canvasNode.md).

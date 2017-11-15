@@ -1,9 +1,25 @@
 # class CanvasNode
 
+CnavasNode will proxy a list of properties.\
+Whenever you assign values to them, the view will be automatically updated, aka invoking `draw` method.\
+List showed below.
+
+```js
+font
+size
+style
+strokeStyle
+color
+text
+```
+
 ## draw()
 
 Draw the node on canvas.\
 In fact, this would update the whole canvas, in other wrods, redraw everything.
+
+> In most cases, you don't need to call `draw` since the `CanvasNode` handle the update for you.\
+But if you have some unique need to update the view, then you can alway use `draw` manually.
 
 ```js
 node.draw()
@@ -27,6 +43,35 @@ node.moveTo({x: 100, y: 100})
 node.remove()
 ```
 
+## hover(inCallback[, outCallback])
+
+- inCallback `<function(event, node)>`: called (multiple times) when the node is being hovered.
+  - event `<Event>`: native event.
+  - node `<CanvasNode>`: node being hovered.
+- [outCallback] `<function(event, node)>`: called (only once) when the node stops being hovered.
+
+```js
+const color = node.color
+const hoverColor = '#fff'
+node.hover(() => {
+  node.color = hoverColor
+}, () => {
+  node.color = color
+})
+```
+
+## click(callback)
+
+- callback `<function(event, node)>`: called (once) when the node is being clicked
+  - event `<Event>`: native event.
+  - node `<CanvasNode>`: node being hovered.
+
+```js
+node.click((e, target) => {
+  console.log('node is clicked', target)
+})
+```
+
 ## forEach(fn)
 
 - fn `<function(item, index, arr)>`: just like `Array.prototype.forEach`. This iterates all `CanvasNode` instances.
@@ -37,3 +82,7 @@ node.forEach(item => {
 })
 node.draw() // no CanvasNode would remain
 ```
+
+## destory()
+
+Like it suggests, destory the node

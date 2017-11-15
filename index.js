@@ -36,6 +36,7 @@ function getVertexesForRect(raw) {
     var x = raw[0], y = raw[1], w = raw[2], h = raw[3];
     return [x, y, x + w, y, x + w, y + h, x, y + h];
 }
+//# sourceMappingURL=getVertexes.js.map
 
 var pointInPolygon = function (point, vs) {
     // ray-casting algorithm based on
@@ -122,6 +123,7 @@ function getClickedLine(pos) {
         .filter(function (node) { return node instanceof ArrowNode; })
         .find(function (node) { return isPointOnCurve(node.stops, pos); });
 }
+//# sourceMappingURL=isClicked.js.map
 
 var MARGIN_ERROR = 5;
 function drawTriangle() {
@@ -258,12 +260,278 @@ function calculatePos(dir, node) {
         y: y
     };
 }
+//# sourceMappingURL=drawArrow.js.map
+
+function random() {
+    return parseInt(Date.now() + '' + Math.floor(Math.random() * 1000000), 16);
+}
+var PRIVATE_KEY = 'canvas-node-fn-key';
+var TAG_NAME = Symbol(PRIVATE_KEY);
+function tagFn(fn) {
+    fn[TAG_NAME] = random();
+    return fn;
+}
+function inheritTag(source, target) {
+    var tag = source[TAG_NAME];
+    if (tag) {
+        target[TAG_NAME] = tag;
+    }
+    return target;
+}
+function isSameFn(fn1, fn2) {
+    var fn1Tag = fn1[TAG_NAME];
+    var fn2Tag = fn2[TAG_NAME];
+    if (fn1Tag && fn2Tag) {
+        return fn1Tag !== fn2Tag;
+    }
+    return fn1 !== fn2;
+}
+//# sourceMappingURL=tagFn.js.map
+
+var EventManager = (function () {
+    function EventManager() {
+    }
+    EventManager.add = function (el, type, cb) {
+        var item = findEventItem(el, type);
+        if (!item) {
+            item = {
+                el: el,
+                type: type,
+                cbs: []
+            };
+        }
+        item.cbs.push(cb);
+        this.list.push(item);
+    };
+    EventManager.remove = function (el, type, cb) {
+        var item = findEventItem(el, type);
+        if (!item)
+            return;
+        if (!cb) {
+            item.cbs = [];
+        }
+        else {
+            console.log('before', item.cbs.length);
+            item.cbs = item.cbs.filter(function (oldCb) { return isSameFn(oldCb, cb); });
+            console.log('after', item.cbs.length);
+        }
+    };
+    EventManager.list = [];
+    return EventManager;
+}());
+function findEventItem(el, type) {
+    return EventManager.list.find(function (item) { return item.el === el && item.type === type; });
+}
+function addEvent(el, type, cb) {
+    var item = findEventItem(el, type);
+    if (!item) {
+        el.addEventListener(type, function handler(e) {
+            var cbs = findEventItem(el, type).cbs;
+            cbs.forEach(function (cb) {
+                cb(e);
+            });
+        });
+    }
+    EventManager.add(el, type, cb);
+}
+function removeEvent(el, type, cb) {
+    EventManager.remove(el, type, cb);
+}
+
+var NORMALIZE_LIST = ['mousemove', 'mouseout'];
+var target;
+function shouldNormalizeEvent(type) {
+    return NORMALIZE_LIST.includes(type);
+}
+function normalizeEvent(type, cb) {
+    switch (type) {
+        case 'mousemove':
+            return generateMouseMoveHandler(cb);
+        case 'mouseout':
+            return generateMouseOutHandler(cb);
+    }
+}
+function normalizeEventType(type) {
+    if (type === 'mouseout')
+        return 'mousemove';
+    return type;
+}
+function generateMouseMoveHandler(cb) {
+    return function handler(e) {
+        var pos = {
+            x: e.offsetX,
+            y: e.offsetY
+        };
+        var node = getClickedNode(pos);
+        if (!node)
+            return;
+        target = node;
+        cb(e, node);
+    };
+}
+function generateMouseOutHandler(cb) {
+    return function handler(e) {
+        var pos = {
+            x: e.offsetX,
+            y: e.offsetY
+        };
+        var node = getClickedNode(pos);
+        if (node === target)
+            return;
+        if (!target)
+            return;
+        cb(e, target);
+        target = null;
+    };
+}
+//# sourceMappingURL=normalizeNodeEvent.js.map
+
+var NodeEventManager = (function () {
+    function NodeEventManager() {
+    }
+    NodeEventManager.add = function (type, cb) {
+        var item = this.getItem(type);
+        if (!item) {
+            item = {
+                type: type,
+                cbs: [cb]
+            };
+            this.list.push(item);
+        }
+        else {
+            item.cbs.push(cb);
+        }
+    };
+    NodeEventManager.getCbs = function (type) {
+        return this.getItem(type).cbs;
+    };
+    NodeEventManager.getItem = function (type) {
+        return this.list.find(function (item) { return item.type === type; });
+    };
+    NodeEventManager.remove = function (type, cb) {
+        if (!cb) {
+            this.list = this.list.filter(function (item) { return item.type !== type; });
+        }
+        else {
+            var item = this.getItem(type);
+            if (!item)
+                return;
+            item.cbs = item.cbs.filter(function (oldCb) { return isSameFn(oldCb, cb); });
+        }
+    };
+    NodeEventManager.list = [];
+    return NodeEventManager;
+}());
+function listenToNodeEvent(type, cb) {
+    var $type = normalizeEventType(type);
+    var fn;
+    if (shouldNormalizeEvent(type)) {
+        fn = normalizeEvent(type, cb);
+    }
+    else {
+        fn = eventHandler;
+    }
+    function eventHandler(e) {
+        var pos = {
+            x: e.offsetX,
+            y: e.offsetY
+        };
+        var target = getClickedNode(pos);
+        if (!target)
+            return;
+        cb(e, target);
+    }
+    inheritTag(cb, fn);
+    addEvent(Manager.canvas, $type, fn);
+    NodeEventManager.add(type, fn);
+}
+function removeNodeEvent(type, cb) {
+    var $type = normalizeEventType(type);
+    if (cb) {
+        removeEvent(Manager.canvas, $type, cb);
+        NodeEventManager.remove(type, cb);
+    }
+    else {
+        NodeEventManager.getCbs(type).forEach(function (cb) {
+            removeEvent(Manager.canvas, $type, cb);
+        });
+        NodeEventManager.remove(type);
+    }
+}
+//# sourceMappingURL=nativeToNodeEvent.js.map
+
+function isUndef(input) {
+    return typeof input === 'undefined';
+}
+function isNull(input) {
+    return input === null;
+}
+//# sourceMappingURL=types.js.map
+
+var PRIVATE_KEY$1 = 'canvas-node';
+var KEY_NAME = Symbol(PRIVATE_KEY$1);
+var Batch = (function () {
+    function Batch() {
+    }
+    Batch.add = function (fn, uniqueKey) {
+        if (!isUndef(uniqueKey) && !isNull(uniqueKey)) {
+            fn[KEY_NAME] = uniqueKey;
+            var existed = this.includes(uniqueKey);
+            if (existed) {
+                this.unify(uniqueKey, fn);
+            }
+            else {
+                this.list.push(fn);
+            }
+        }
+        else {
+            this.list.push(fn);
+        }
+        this.batch();
+    };
+    Batch.includes = function (key) {
+        return this.list.some(function (cb) {
+            return cb[KEY_NAME] === key;
+        });
+    };
+    Batch.unify = function (key, fn) {
+        this.list.map(function (cb) {
+            if (cb[KEY_NAME] === key) {
+                return fn;
+            }
+            return cb;
+        });
+    };
+    Batch.batch = function () {
+        var _this = this;
+        cancelAnimationFrame(this.timer);
+        this.timer = requestAnimationFrame(function () {
+            _this.invoke();
+        });
+    };
+    Batch.invoke = function () {
+        var len = this.list.length;
+        var i = 0;
+        while (i < len) {
+            var cb = this.list[i];
+            cb();
+            i++;
+        }
+        this.list = [];
+    };
+    Batch.timer = 0;
+    Batch.list = [];
+    return Batch;
+}());
+
+//# sourceMappingURL=batch.js.map
 
 function defaultData() {
     return {
         font: '14px Arial',
         style: '#fff',
         strokeStyle: '#000',
+        color: '#000',
         data: {}
     };
 }
@@ -271,6 +539,18 @@ var CanvasNode = (function () {
     function CanvasNode(option) {
         this.drawCbs = [];
         this.lines = [];
+        this.autoUpdateFields = [
+            'font',
+            'size',
+            'style',
+            'strokeStyle',
+            'color',
+            'text'
+        ];
+        this.hoverInCb = [];
+        this.hoverOutCb = [];
+        this.clickCb = [];
+        this.proxy();
         Object.assign(this, defaultData(), option, {
             ctx: Manager.ctx,
             size: Manager.size
@@ -278,6 +558,27 @@ var CanvasNode = (function () {
         this.$moveTo(this.pos);
         Manager.add(this);
     }
+    CanvasNode.prototype.proxy = function () {
+        var _this = this;
+        var inited = [];
+        this.autoUpdateFields.forEach(function (key) {
+            Object.defineProperty(_this, key, {
+                get: function () {
+                    return this['$' + key];
+                },
+                set: function (val) {
+                    var _this = this;
+                    this['$' + key] = val;
+                    if (!inited.includes(key)) {
+                        return inited.push(key);
+                    }
+                    Batch.add(function () {
+                        _this.draw();
+                    }, this);
+                }
+            });
+        });
+    };
     Object.defineProperty(CanvasNode.prototype, "vertexes", {
         get: function () {
             var _this = this;
@@ -338,7 +639,7 @@ var CanvasNode = (function () {
         this.ctx.textBaseline = 'middle';
         this.ctx.save();
         this.ctx.translate(width / 2, height / 2);
-        this.ctx.fillStyle = '#000';
+        this.ctx.fillStyle = this.color || '#000';
         this.ctx.fillText($text, 0, 0);
         this.updateText($text);
         this.ctx.restore();
@@ -377,8 +678,54 @@ var CanvasNode = (function () {
     CanvasNode.prototype.addDrawCb = function (cb) {
         this.drawCbs.push(cb);
     };
+    CanvasNode.prototype.hover = function (inCb, outCb) {
+        var _this = this;
+        var $inCb = function (e, node) {
+            if (node !== _this)
+                return;
+            inCb(e, node);
+        };
+        tagFn($inCb);
+        listenToNodeEvent('mousemove', $inCb);
+        this.hoverInCb.push($inCb);
+        if (!outCb)
+            return;
+        var $outCb = function (e, node) {
+            if (node !== _this)
+                return;
+            outCb(e, node);
+        };
+        tagFn($outCb);
+        listenToNodeEvent('mouseout', $outCb);
+        this.hoverOutCb.push($outCb);
+    };
+    CanvasNode.prototype.click = function (clickCb) {
+        var _this = this;
+        var $clickCb = function (e, node) {
+            if (node !== _this)
+                return;
+            clickCb(e, node);
+        };
+        tagFn($clickCb);
+        listenToNodeEvent('click', $clickCb);
+        this.clickCb.push($clickCb);
+    };
+    CanvasNode.prototype.destory = function () {
+        this.remove();
+        this.hoverInCb.forEach(function (cb) {
+            removeNodeEvent('mousemove', cb);
+        });
+        this.hoverOutCb.forEach(function (cb) {
+            removeNodeEvent('mouseout', cb);
+        });
+        this.clickCb.forEach(function (cb) {
+            removeNodeEvent('click', cb);
+        });
+    };
     return CanvasNode;
 }());
+
+//# sourceMappingURL=node.js.map
 
 function getDefaultOption() {
     return {
@@ -422,6 +769,8 @@ var ArrowNode = (function (_super) {
     };
     return ArrowNode;
 }(CanvasNode));
+
+//# sourceMappingURL=arrow.js.map
 
 var Manager = (function () {
     function Manager() {
@@ -495,6 +844,8 @@ var Manager = (function () {
     return Manager;
 }());
 
+//# sourceMappingURL=manager.js.map
+
 var Menu = (function (_super) {
     __extends(Menu, _super);
     function Menu(option) {
@@ -503,172 +854,7 @@ var Menu = (function (_super) {
     return Menu;
 }(CanvasNode));
 
-var EventManager = (function () {
-    function EventManager() {
-    }
-    EventManager.add = function (el, type, cb) {
-        var item = findEventItem(el, type);
-        if (!item) {
-            item = {
-                el: el,
-                type: type,
-                cbs: []
-            };
-        }
-        item.cbs.push(cb);
-        this.list.push(item);
-    };
-    EventManager.remove = function (el, type, cb) {
-        var item = findEventItem(el, type);
-        if (!item)
-            return;
-        if (!cb) {
-            item.cbs = [];
-        }
-        else {
-            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
-        }
-    };
-    EventManager.list = [];
-    return EventManager;
-}());
-function findEventItem(el, type) {
-    return EventManager.list.find(function (item) { return item.el === el && item.type === type; });
-}
-function addEvent(el, type, cb) {
-    var item = findEventItem(el, type);
-    if (!item) {
-        el.addEventListener(type, function handler(e) {
-            var cbs = findEventItem(el, type).cbs;
-            cbs.forEach(function (cb) {
-                cb(e);
-            });
-        });
-    }
-    EventManager.add(el, type, cb);
-}
-function removeEvent(el, type, cb) {
-    EventManager.remove(el, type, cb);
-}
-
-var NORMALIZE_LIST = ['mousemove', 'mouseout'];
-var target;
-function shouldNormalizeEvent(type) {
-    return NORMALIZE_LIST.includes(type);
-}
-function normalizeEvent(type, cb) {
-    switch (type) {
-        case 'mousemove':
-            return generateMouseMoveHandler(cb);
-        case 'mouseout':
-            return generateMouseOutHandler(cb);
-    }
-}
-function normalizeEventType(type) {
-    if (type === 'mouseout')
-        return 'mousemove';
-    return type;
-}
-function generateMouseMoveHandler(cb) {
-    return function handler(e) {
-        var pos = {
-            x: e.offsetX,
-            y: e.offsetY
-        };
-        var node = getClickedNode(pos);
-        if (!node)
-            return;
-        target = node;
-        cb(node);
-    };
-}
-function generateMouseOutHandler(cb) {
-    return function handler(e) {
-        var pos = {
-            x: e.offsetX,
-            y: e.offsetY
-        };
-        var node = getClickedNode(pos);
-        if (node === target)
-            return;
-        if (!target)
-            return;
-        cb(target);
-        target = null;
-    };
-}
-
-var NodeEventManager = (function () {
-    function NodeEventManager() {
-    }
-    NodeEventManager.add = function (type, cb) {
-        var item = this.getItem(type);
-        if (!item) {
-            item = {
-                type: type,
-                cbs: [cb]
-            };
-            this.list.push(item);
-        }
-        else {
-            item.cbs.push(cb);
-        }
-    };
-    NodeEventManager.getCbs = function (type) {
-        return this.getItem(type).cbs;
-    };
-    NodeEventManager.getItem = function (type) {
-        return this.list.find(function (item) { return item.type === type; });
-    };
-    NodeEventManager.remove = function (type, cb) {
-        if (!cb) {
-            this.list = this.list.filter(function (item) { return item.type !== type; });
-        }
-        else {
-            var item = this.getItem(type);
-            if (!item)
-                return;
-            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
-        }
-    };
-    NodeEventManager.list = [];
-    return NodeEventManager;
-}());
-function listenToNodeEvent(type, cb) {
-    var $type = normalizeEventType(type);
-    var fn;
-    if (shouldNormalizeEvent(type)) {
-        fn = normalizeEvent(type, cb);
-    }
-    else {
-        fn = eventHandler;
-    }
-    function eventHandler(e) {
-        var pos = {
-            x: e.offsetX,
-            y: e.offsetY
-        };
-        var target = getClickedNode(pos);
-        if (!target)
-            return;
-        cb(target);
-    }
-    addEvent(Manager.canvas, $type, fn);
-    NodeEventManager.add(type, fn);
-}
-function removeNodeEvent(type, cb) {
-    var $type = normalizeEventType(type);
-    if (cb) {
-        removeEvent(Manager.canvas, $type, cb);
-        NodeEventManager.remove(type, cb);
-    }
-    else {
-        NodeEventManager.getCbs(type).forEach(function (cb) {
-            removeEvent(Manager.canvas, $type, cb);
-        });
-        NodeEventManager.remove(type);
-    }
-}
+//# sourceMappingURL=menu.js.map
 
 var Entry = (function () {
     function Entry() {
@@ -707,6 +893,8 @@ var Entry = (function () {
     Entry.Node = CanvasNode;
     return Entry;
 }());
+
+//# sourceMappingURL=index.js.map
 
 return Entry;
 
