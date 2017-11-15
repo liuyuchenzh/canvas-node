@@ -19,7 +19,7 @@
     "rollup-plugin-commonjs": "^8.2.5",
     "rollup-plugin-node-resolve": "^3.0.0",
     "rollup-plugin-typescript2": "^0.8.0",
-    "typescript": "^2.6.0"
+    "typescript": "^2.6.1"
   },
   "scripts": {
     "dev": "rollup -c -w",

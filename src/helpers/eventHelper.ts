@@ -29,9 +29,7 @@ class EventManager {
     if (!cb) {
       item.cbs = []
     } else {
-      console.log('before', item.cbs.length)
       item.cbs = item.cbs.filter(oldCb => isSameFn(oldCb, cb))
-      console.log('after', item.cbs.length)
     }
   }
 }
