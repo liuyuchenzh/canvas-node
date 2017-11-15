@@ -1,6 +1,6 @@
 {
   "name": "canvas-node",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Use oject to represent canvas drawings",
   "main": "index.js",
   "module": "index_es.js",
