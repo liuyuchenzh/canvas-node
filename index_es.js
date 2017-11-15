@@ -301,9 +301,7 @@ var EventManager = (function () {
             item.cbs = [];
         }
         else {
-            console.log('before', item.cbs.length);
             item.cbs = item.cbs.filter(function (oldCb) { return isSameFn(oldCb, cb); });
-            console.log('after', item.cbs.length);
         }
     };
     EventManager.list = [];
