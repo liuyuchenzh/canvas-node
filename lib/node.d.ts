@@ -41,6 +41,9 @@ export declare class CanvasNode implements CanvasNodeOption {
     rawVertexes: RawVertexes;
     lines: ArrowNode[];
     private autoUpdateFields;
+    private hoverInCb;
+    private hoverOutCb;
+    private clickCb;
     constructor(option: CanvasNodeOption);
     proxy(): void;
     readonly vertexes: number[];
@@ -61,4 +64,5 @@ export declare class CanvasNode implements CanvasNodeOption {
     addDrawCb(cb: Callback): void;
     hover(inCb: NodeEventCallback, outCb?: NodeEventCallback): void;
     click(clickCb: NodeEventCallback): void;
+    destory(): void;
 }

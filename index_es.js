@@ -253,6 +253,31 @@ function calculatePos(dir, node) {
     };
 }
 
+function random() {
+    return parseInt(Date.now() + '' + Math.floor(Math.random() * 1000000), 16);
+}
+var PRIVATE_KEY = 'canvas-node-fn-key';
+var TAG_NAME = Symbol(PRIVATE_KEY);
+function tagFn(fn) {
+    fn[TAG_NAME] = random();
+    return fn;
+}
+function inheritTag(source, target) {
+    var tag = source[TAG_NAME];
+    if (tag) {
+        target[TAG_NAME] = tag;
+    }
+    return target;
+}
+function isSameFn(fn1, fn2) {
+    var fn1Tag = fn1[TAG_NAME];
+    var fn2Tag = fn2[TAG_NAME];
+    if (fn1Tag && fn2Tag) {
+        return fn1Tag !== fn2Tag;
+    }
+    return fn1 !== fn2;
+}
+
 var EventManager = (function () {
     function EventManager() {
     }
@@ -276,7 +301,9 @@ var EventManager = (function () {
             item.cbs = [];
         }
         else {
-            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
+            console.log('before', item.cbs.length);
+            item.cbs = item.cbs.filter(function (oldCb) { return isSameFn(oldCb, cb); });
+            console.log('after', item.cbs.length);
         }
     };
     EventManager.list = [];
@@ -378,7 +405,7 @@ var NodeEventManager = (function () {
             var item = this.getItem(type);
             if (!item)
                 return;
-            item.cbs = item.cbs.filter(function (oldCb) { return oldCb !== cb; });
+            item.cbs = item.cbs.filter(function (oldCb) { return isSameFn(oldCb, cb); });
         }
     };
     NodeEventManager.list = [];
@@ -403,6 +430,7 @@ function listenToNodeEvent(type, cb) {
             return;
         cb(e, target);
     }
+    inheritTag(cb, fn);
     addEvent(Manager.canvas, $type, fn);
     NodeEventManager.add(type, fn);
 }
@@ -419,6 +447,69 @@ function removeNodeEvent(type, cb) {
         NodeEventManager.remove(type);
     }
 }
+
+function isUndef(input) {
+    return typeof input === 'undefined';
+}
+function isNull(input) {
+    return input === null;
+}
+
+var PRIVATE_KEY$1 = 'canvas-node';
+var KEY_NAME = Symbol(PRIVATE_KEY$1);
+var Batch = (function () {
+    function Batch() {
+    }
+    Batch.add = function (fn, uniqueKey) {
+        if (!isUndef(uniqueKey) && !isNull(uniqueKey)) {
+            fn[KEY_NAME] = uniqueKey;
+            var existed = this.includes(uniqueKey);
+            if (existed) {
+                this.unify(uniqueKey, fn);
+            }
+            else {
+                this.list.push(fn);
+            }
+        }
+        else {
+            this.list.push(fn);
+        }
+        this.batch();
+    };
+    Batch.includes = function (key) {
+        return this.list.some(function (cb) {
+            return cb[KEY_NAME] === key;
+        });
+    };
+    Batch.unify = function (key, fn) {
+        this.list.map(function (cb) {
+            if (cb[KEY_NAME] === key) {
+                return fn;
+            }
+            return cb;
+        });
+    };
+    Batch.batch = function () {
+        var _this = this;
+        cancelAnimationFrame(this.timer);
+        this.timer = requestAnimationFrame(function () {
+            _this.invoke();
+        });
+    };
+    Batch.invoke = function () {
+        var len = this.list.length;
+        var i = 0;
+        while (i < len) {
+            var cb = this.list[i];
+            cb();
+            i++;
+        }
+        this.list = [];
+    };
+    Batch.timer = 0;
+    Batch.list = [];
+    return Batch;
+}());
 
 function defaultData() {
     return {
@@ -441,6 +532,9 @@ var CanvasNode = (function () {
             'color',
             'text'
         ];
+        this.hoverInCb = [];
+        this.hoverOutCb = [];
+        this.clickCb = [];
         this.proxy();
         Object.assign(this, defaultData(), option, {
             ctx: Manager.ctx,
@@ -451,15 +545,21 @@ var CanvasNode = (function () {
     }
     CanvasNode.prototype.proxy = function () {
         var _this = this;
+        var inited = [];
         this.autoUpdateFields.forEach(function (key) {
-            console.log(key);
             Object.defineProperty(_this, key, {
                 get: function () {
                     return this['$' + key];
                 },
                 set: function (val) {
+                    var _this = this;
                     this['$' + key] = val;
-                    console.log('in set');
+                    if (!inited.includes(key)) {
+                        return inited.push(key);
+                    }
+                    Batch.add(function () {
+                        _this.draw();
+                    }, this);
                 }
             });
         });
@@ -565,25 +665,46 @@ var CanvasNode = (function () {
     };
     CanvasNode.prototype.hover = function (inCb, outCb) {
         var _this = this;
-        listenToNodeEvent('mousemove', function (e, node) {
+        var $inCb = function (e, node) {
             if (node !== _this)
                 return;
             inCb(e, node);
-        });
+        };
+        tagFn($inCb);
+        listenToNodeEvent('mousemove', $inCb);
+        this.hoverInCb.push($inCb);
         if (!outCb)
             return;
-        listenToNodeEvent('mouseout', function (e, node) {
+        var $outCb = function (e, node) {
             if (node !== _this)
                 return;
             outCb(e, node);
-        });
+        };
+        tagFn($outCb);
+        listenToNodeEvent('mouseout', $outCb);
+        this.hoverOutCb.push($outCb);
     };
     CanvasNode.prototype.click = function (clickCb) {
         var _this = this;
-        listenToNodeEvent('click', function (e, node) {
+        var $clickCb = function (e, node) {
             if (node !== _this)
                 return;
             clickCb(e, node);
+        };
+        tagFn($clickCb);
+        listenToNodeEvent('click', $clickCb);
+        this.clickCb.push($clickCb);
+    };
+    CanvasNode.prototype.destory = function () {
+        this.remove();
+        this.hoverInCb.forEach(function (cb) {
+            removeNodeEvent('mousemove', cb);
+        });
+        this.hoverOutCb.forEach(function (cb) {
+            removeNodeEvent('mouseout', cb);
+        });
+        this.clickCb.forEach(function (cb) {
+            removeNodeEvent('click', cb);
         });
     };
     return CanvasNode;
