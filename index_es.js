@@ -185,7 +185,11 @@ function calculateStop(x1, y1, x2, y2) {
             return [x1, y2];
     }
 }
-function drawLine(ctx, start, end, ratio) {
+function fixRatio(ratio) {
+    return Math.min(Math.max(0.001, ratio), 0.999);
+}
+function drawLine(ctx, start, end, ratio, arrowPath, colorObj) {
+    var style = colorObj.style, strokeStyle = colorObj.strokeStyle;
     var startX = start.x, startY = start.y;
     var endX = end.x, endY = end.y;
     var $endX = normalizeEndPoint(startX, endX);
@@ -194,21 +198,23 @@ function drawLine(ctx, start, end, ratio) {
     ctx.moveTo(startX, startY);
     var stop = calculateStop(startX, startY, $endX, $endY);
     ctx.quadraticCurveTo(stop[0], stop[1], $endX, $endY);
-    var arrowX = simulateCurve(startX, stop[0], $endX, ratio);
-    var arrowY = simulateCurve(startY, stop[1], $endY, ratio);
-    var arrowDirX = getDirective(startX, stop[0], $endX, ratio);
-    var arrowDirY = getDirective(startY, stop[1], $endY, ratio);
+    var arrowX = simulateCurve(startX, stop[0], $endX, fixRatio(ratio));
+    var arrowY = simulateCurve(startY, stop[1], $endY, fixRatio(ratio));
+    var arrowDirX = getDirective(startX, stop[0], $endX, fixRatio(ratio));
+    var arrowDirY = getDirective(startY, stop[1], $endY, fixRatio(ratio));
     var tan = arrowDirY / arrowDirX;
     var angle = Math.atan(tan);
     var goLeft = $endX < startX;
     var rotateAngle = goLeft ? angle - Math.PI : angle;
     ctx.lineWidth = 2;
+    ctx.strokeStyle = strokeStyle;
     ctx.stroke();
     ctx.save();
     ctx.translate(arrowX, arrowY);
     ctx.rotate(rotateAngle);
     var triangle = drawTriangle();
-    ctx.fill(triangle);
+    ctx.fillStyle = style;
+    ctx.fill(arrowPath || triangle);
     ctx.restore();
 }
 function centralizePoint(node) {
@@ -726,12 +732,22 @@ var ArrowNode = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(ArrowNode.prototype, "colorObj", {
+        get: function () {
+            return {
+                strokeStyle: this.strokeStyle,
+                style: this.style
+            };
+        },
+        enumerable: true,
+        configurable: true
+    });
     ArrowNode.prototype.$moveTo = function (end) {
         this.updateEndPos(end);
-        drawLine(this.ctx, this.pos, end, this.ratio);
+        drawLine(this.ctx, this.pos, end, this.ratio, this.arrowPath, this.colorObj);
     };
     ArrowNode.prototype.$draw = function () {
-        drawLine(this.ctx, this.pos, this.endPos, this.ratio);
+        drawLine(this.ctx, this.pos, this.endPos, this.ratio, this.arrowPath, this.colorObj);
     };
     ArrowNode.prototype.updateEndPos = function (end) {
         this.endPos = end;

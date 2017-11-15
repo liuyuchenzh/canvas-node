@@ -1,5 +1,6 @@
 import { CanvasNode, Pos } from '../node'
 import { getDirective, simulateCurve } from './isClicked'
+import { Color } from '../arrow'
 
 const MARGIN_ERROR: number = 5
 
@@ -115,18 +116,31 @@ export function calculateStop(
 }
 
 /**
+ * make sure ratio is in a reasonable range
+ * @param {number} ratio 
+ */
+function fixRatio(ratio: number): number {
+  return Math.min(Math.max(0.001, ratio), 0.999)
+}
+
+/**
  * draw a line with arrow
  * @param {CanvasRenderingContext2D} ctx
  * @param {Pos} start
  * @param {Pos} end
  * @param {number} ratio
+ * @param {Path2D & CanvasFillRule} arrowPath
+ * @param {Color} colorObj
  */
 export function drawLine(
   ctx: CanvasRenderingContext2D,
   start: Pos,
   end: Pos,
-  ratio: number
+  ratio: number,
+  arrowPath: Path2D & CanvasFillRule,
+  colorObj: Color
 ) {
+  const { style, strokeStyle } = colorObj
   const { x: startX, y: startY } = start
 
   const { x: endX, y: endY } = end
@@ -140,23 +154,26 @@ export function drawLine(
   // draw curve
   ctx.quadraticCurveTo(stop[0], stop[1], $endX, $endY)
   // get where to put arrow
-  const arrowX: number = simulateCurve(startX, stop[0], $endX, ratio)
-  const arrowY: number = simulateCurve(startY, stop[1], $endY, ratio)
+  const arrowX: number = simulateCurve(startX, stop[0], $endX, fixRatio(ratio))
+  const arrowY: number = simulateCurve(startY, stop[1], $endY, fixRatio(ratio))
   // calculate tan
-  const arrowDirX: number = getDirective(startX, stop[0], $endX, ratio)
-  const arrowDirY: number = getDirective(startY, stop[1], $endY, ratio)
+  const arrowDirX: number = getDirective(startX, stop[0], $endX, fixRatio(ratio))
+  const arrowDirY: number = getDirective(startY, stop[1], $endY, fixRatio(ratio))
   const tan: number = arrowDirY / arrowDirX
   // get rotate angle
   const angle: number = Math.atan(tan)
   const goLeft: boolean = $endX < startX
   const rotateAngle: number = goLeft ? angle - Math.PI : angle
   ctx.lineWidth = 2
+  ctx.strokeStyle = strokeStyle
   ctx.stroke()
   ctx.save()
   ctx.translate(arrowX, arrowY)
   ctx.rotate(rotateAngle)
   const triangle = drawTriangle()
-  ctx.fill(triangle as CanvasFillRule)
+  ctx.fillStyle = style
+  // use custom arrow path or default one
+  ctx.fill(arrowPath as CanvasFillRule|| triangle as CanvasFillRule)
   ctx.restore()
 }
 

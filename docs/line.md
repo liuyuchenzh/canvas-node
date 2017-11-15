@@ -2,6 +2,12 @@
 
 ArrowNode inherit all methods from `CanvasNode`, and has some own ones.
 
+## new ArrowNode(option)
+
+- option `<object>`: almost the same as the one for `CanvasNode`, with two more optional fields:
+  - [ratio] `<number>`: place where the arrow should be on the line
+  - [arrowPath] `<Path2D>`: custom arrow shape. SHOULD BE POINTING UPWARDS.
+
 ## connect(from, to)
 
 - from `<CanvasNode>`: from which `CanvasNode`.

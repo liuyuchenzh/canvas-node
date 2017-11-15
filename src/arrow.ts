@@ -5,6 +5,12 @@ import { calculateStop } from './helpers/drawArrow'
 
 export interface ArrowOption extends CanvasNodeOption {
   ratio?: number
+  arrowPath?: Path2D & CanvasFillRule
+}
+
+export interface Color {
+  style: string
+  strokeStyle: string
 }
 
 function getDefaultOption() {
@@ -18,6 +24,7 @@ export class ArrowNode extends CanvasNode {
   to: CanvasNode
   endPos: Pos
   ratio: number
+  arrowPath: Path2D & CanvasFillRule
 
   constructor(option: ArrowOption) {
     super(Object.assign({}, getDefaultOption(), option))
@@ -33,15 +40,29 @@ export class ArrowNode extends CanvasNode {
     return [[this.pos.x, this.pos.y], stop, [this.endPos.x, this.endPos.y]]
   }
 
+  get colorObj(): Color {
+    return {
+      strokeStyle: this.strokeStyle,
+      style: this.style
+    }
+  }
+
   // overRide
   $moveTo(end: Pos) {
     this.updateEndPos(end)
-    drawLine(this.ctx, this.pos, end, this.ratio)
+    drawLine(this.ctx, this.pos, end, this.ratio, this.arrowPath, this.colorObj)
   }
 
   // overRide
   $draw() {
-    drawLine(this.ctx, this.pos, this.endPos, this.ratio)
+    drawLine(
+      this.ctx,
+      this.pos,
+      this.endPos,
+      this.ratio,
+      this.arrowPath,
+      this.colorObj
+    )
   }
 
   updateEndPos(end: Pos) {
