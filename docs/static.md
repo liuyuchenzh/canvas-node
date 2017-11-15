@@ -77,11 +77,23 @@ CanvasNode.addEvent('mouseover', (e, node) => {
 - type `<string>`: type of native event wish to stop listening to.
 - [handler] `<function(event)>`: specific handler to be removed. If not provided, all handlers registered by `CanvasNode.nativeAddEvent` for such type of event will be removed.
 
-## CavansNode.getClickedLine(position)
+## CanvasNode.getClickedLine(position)
 
 - position `{object}`: clicked position in form of `{x: number, y: number}`.
 
 return `ArrowNode`
+
+## CanvasNode.getClickedNode(position)
+
+- position `{object}`: clicked position in form of `{x: number, y: number}`.
+
+return `CanvasNode`
+
+## CanvasNode.getClickedBox(position)
+
+- position `{object}`: clicked position in form of `{x: number, y: number}`.
+
+return `CanvasNode` but exclude `ArrowNode`
 
 ## CanvasNode.centralizePoint(node)
 

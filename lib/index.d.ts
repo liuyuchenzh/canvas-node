@@ -3,7 +3,7 @@ import { CanvasNode, CanvasNodeOption, Pos, NodeEventCallback } from './node';
 import { Menu } from './menu';
 import { ArrowNode } from './arrow';
 import { addEvent, removeEvent } from './helpers/eventHelper';
-import { getClickedNode, getClickedLine } from './helpers/isClicked';
+import { getClickedNode, getClickedLine, getClickedBox } from './helpers/isClicked';
 import { centralizePoint, placePointOnEdge } from './helpers/drawArrow';
 declare class Entry {
     static init(option: ManagerOption): void;
@@ -16,6 +16,7 @@ declare class Entry {
     static nativeRemoveEvent: typeof removeEvent;
     static getClickedNode: typeof getClickedNode;
     static getClickedLine: typeof getClickedLine;
+    static getClickedBox: typeof getClickedBox;
     static centralizePoint: typeof centralizePoint;
     static placePointOnEdge: typeof placePointOnEdge;
     static ArrowNode: typeof ArrowNode;

@@ -56,6 +56,17 @@ var pointInPolygon = function (point, vs) {
     return inside;
 };
 
+function findFromRight(list, fn) {
+    var len = list.length;
+    var i = len - 1;
+    while (i && i > -1) {
+        var item = list[i];
+        if (fn(item, i, list))
+            return item;
+        i--;
+    }
+}
+
 var MARGIN_ERROR$1 = 4;
 function isPointInPolygon(vertexes, pos) {
     var poly = convertToPoly(vertexes);
@@ -108,7 +119,7 @@ function distanceBetween2Points(x1, y1, x2, y2) {
 }
 function getClickedNode(pos) {
     var list = Manager.list;
-    return list.find(function (node) {
+    return findFromRight(list, function (node) {
         if (node instanceof ArrowNode) {
             return isPointOnCurve(node.stops, pos);
         }
@@ -117,10 +128,13 @@ function getClickedNode(pos) {
         return isPointInPolygon(node.vertexes, pos);
     });
 }
+function getClickedBox(pos) {
+    var list = Manager.list.filter(function (node) { return !(node instanceof ArrowNode); });
+    return findFromRight(list, function (node) { return isPointInPolygon(node.vertexes, pos); });
+}
 function getClickedLine(pos) {
-    return Manager.list
-        .filter(function (node) { return node instanceof ArrowNode; })
-        .find(function (node) { return isPointOnCurve(node.stops, pos); });
+    var list = Manager.list.filter(function (node) { return node instanceof ArrowNode; });
+    return findFromRight(list, function (node) { return isPointOnCurve(node.stops, pos); });
 }
 
 var MARGIN_ERROR = 5;
@@ -883,6 +897,7 @@ var Entry = (function () {
     Entry.nativeRemoveEvent = removeEvent;
     Entry.getClickedNode = getClickedNode;
     Entry.getClickedLine = getClickedLine;
+    Entry.getClickedBox = getClickedBox;
     Entry.centralizePoint = centralizePoint;
     Entry.placePointOnEdge = placePointOnEdge;
     Entry.ArrowNode = ArrowNode;

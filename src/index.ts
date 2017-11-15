@@ -4,7 +4,7 @@ import { Menu } from './menu'
 import { listenToNodeEvent, removeNodeEvent } from './helpers/nativeToNodeEvent'
 import { ArrowNode } from './arrow'
 import { addEvent, removeEvent } from './helpers/eventHelper'
-import { getClickedNode, getClickedLine } from './helpers/isClicked'
+import { getClickedNode, getClickedLine, getClickedBox } from './helpers/isClicked'
 import { centralizePoint, placePointOnEdge } from './helpers/drawArrow'
 
 class Entry {
@@ -41,6 +41,7 @@ class Entry {
   static nativeRemoveEvent = removeEvent
   static getClickedNode = getClickedNode
   static getClickedLine = getClickedLine
+  static getClickedBox = getClickedBox
   static centralizePoint = centralizePoint
   static placePointOnEdge = placePointOnEdge
   static ArrowNode = ArrowNode

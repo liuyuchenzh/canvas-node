@@ -2,6 +2,7 @@ import { CanvasNode, Pos } from '../node'
 import { ArrowNode } from '../arrow'
 import pointInPolygon from 'point-in-polygon'
 import { Manager } from '../manager'
+import {findFromRight} from './findFromRight'
 
 export type Poly = [number, number][]
 const MARGIN_ERROR = 4
@@ -133,7 +134,7 @@ function distanceBetween2Points(
  */
 export function getClickedNode(pos: Pos): CanvasNode {
   const list: CanvasNode[] = Manager.list
-  return list.find(node => {
+  return findFromRight(list, node => {
     if (node instanceof ArrowNode) {
       return isPointOnCurve(node.stops, pos)
     }
@@ -143,12 +144,25 @@ export function getClickedNode(pos: Pos): CanvasNode {
 }
 
 /**
+ * whether the box is clicked, exclude line
+ * @param {Pos} pos
+ * @returns {CanvasNode | null}
+ */
+export function getClickedBox(pos: Pos): CanvasNode {
+  const list: CanvasNode[] = Manager.list.filter(
+    node => !(node instanceof ArrowNode)
+  )
+  return findFromRight(list, node => isPointInPolygon(node.vertexes, pos))
+}
+
+/**
  * get the clicked/hover line or undefined
  * @param {Pos} pos
  * @returns {ArrowNode}
  */
 export function getClickedLine(pos: Pos): ArrowNode {
-  return <ArrowNode>Manager.list
-    .filter(node => node instanceof ArrowNode)
-    .find((node: ArrowNode) => isPointOnCurve(node.stops, pos))
+  const list: ArrowNode[] = <ArrowNode[]>Manager.list.filter(
+    node => node instanceof ArrowNode
+  )
+  return findFromRight(list, node => isPointOnCurve(node.stops, pos))
 }
