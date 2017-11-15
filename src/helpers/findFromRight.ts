@@ -4,7 +4,7 @@ export function findFromRight<T>(
 ) {
   const len: number = list.length
   let i: number = len - 1
-  while (i && i > -1) {
+  while (i > -1) {
     const item: T = list[i]
     if (fn(item, i, list)) return item
     i--

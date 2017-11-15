@@ -53,7 +53,7 @@ var pointInPolygon = function (point, vs) {
 function findFromRight(list, fn) {
     var len = list.length;
     var i = len - 1;
-    while (i && i > -1) {
+    while (i > -1) {
         var item = list[i];
         if (fn(item, i, list))
             return item;
