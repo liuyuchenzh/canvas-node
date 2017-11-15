@@ -538,6 +538,9 @@ function defaultData() {
         data: {}
     };
 }
+function isFn(fn) {
+    return typeof fn === 'function';
+}
 var CanvasNode = (function () {
     function CanvasNode(option) {
         this.drawCbs = [];
@@ -563,7 +566,7 @@ var CanvasNode = (function () {
     }
     CanvasNode.prototype.proxy = function () {
         var _this = this;
-        var inited = [];
+        var finished = [];
         this.autoUpdateFields.forEach(function (key) {
             Object.defineProperty(_this, key, {
                 get: function () {
@@ -572,8 +575,8 @@ var CanvasNode = (function () {
                 set: function (val) {
                     var _this = this;
                     this['$' + key] = val;
-                    if (!inited.includes(key)) {
-                        return inited.push(key);
+                    if (!finished.includes(key)) {
+                        return finished.push(key);
                     }
                     Batch.add(function () {
                         _this.draw();
@@ -662,10 +665,18 @@ var CanvasNode = (function () {
         this.lines.forEach(function (line) {
             switch (_this) {
                 case line.from:
-                    line.pos = centralizePoint(_this);
+                    line.pos = isFn(_this.updateLineCb)
+                        ? _this.updateLineCb(_this, line, true)
+                        : isFn(Manager.updateLineCb)
+                            ? Manager.updateLineCb(_this, line, true)
+                            : centralizePoint(_this);
                     break;
                 case line.to:
-                    line.endPos = centralizePoint(_this);
+                    line.endPos = isFn(_this.updateLineCb)
+                        ? _this.updateLineCb(_this, line, false)
+                        : isFn(Manager.updateLineCb)
+                            ? Manager.updateLineCb(_this, line, false)
+                            : centralizePoint(_this);
                     break;
             }
         });
@@ -785,7 +796,7 @@ var Manager = (function () {
     function Manager() {
     }
     Manager.init = function (option) {
-        var canvas = option.canvas;
+        var canvas = option.canvas, updateLineCb = option.updateLineCb;
         var size = {
             x: canvas.width,
             y: canvas.height
@@ -794,6 +805,7 @@ var Manager = (function () {
         this.bindSize(size);
         this.bindCtx(ctx);
         this.bindCanvas(canvas);
+        this.updateLineCb = updateLineCb;
     };
     Manager.add = function (node) {
         this.list.push(node);

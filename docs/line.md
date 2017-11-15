@@ -27,3 +27,20 @@ Abort from the current connecting process.
 ```js
 line.abort()
 ```
+
+## endPos
+
+- `<{x: number, y: number}>`: like `pos`, this is another property to define where to place the line.
+Updating `endPos` would effectively change the end point of the line.
+While updating `pos` would change the origin of the line.
+ 
+
+
+## from
+
+- `<CanvasNode>`: node which the line starts from.
+
+
+## to
+
+- `<CanvasNode>`: node which the line ends with.

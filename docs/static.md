@@ -11,6 +11,8 @@
 
 - option `<object>`
   - canvas `<HTMLCanvasElement>`
+  - [updateLineCb] `<function(box, line, isFrom)>`: define how to place the connecting line between two boxes.
+  Details could be found [here](./updateLineCb.md).
 
 ```js
 CanvasNode.init({
@@ -32,6 +34,7 @@ CanvasNode.init({
   - [strokeStyle] `<string>`: stroke style of the box.
   - [font] `<string>`: font style of the text.
   - [drawCb] `<function>`: custom callback for extra drawing.
+  - [updateLineCb] `<function(box, line, isFrom)>`: see [here](./updateLineCb.md)
 
 return `<CanvasNode>`
 

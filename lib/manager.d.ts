@@ -1,13 +1,15 @@
-import { CanvasNode, Pos } from './node';
+import { CanvasNode, Pos, UpdateLineCallback } from './node';
 import { ArrowNode } from './arrow';
 export interface ManagerOption {
     canvas: HTMLCanvasElement;
+    updateLineCb?: UpdateLineCallback;
 }
 export declare class Manager {
     static size: Pos;
     static ctx: CanvasRenderingContext2D;
     static list: CanvasNode[];
     static canvas: HTMLCanvasElement;
+    static updateLineCb: UpdateLineCallback;
     static init(option: ManagerOption): void;
     static add(node: CanvasNode): void;
     static bindSize(size: Pos): void;

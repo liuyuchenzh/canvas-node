@@ -10,6 +10,7 @@ export declare type height = number;
 export declare type RawVertexes = [x, y, width, height];
 export declare type Callback = (node: CanvasNode) => any;
 export declare type NodeEventCallback = (e: Event, node: CanvasNode) => any;
+export declare type UpdateLineCallback = (node: CanvasNode, line: ArrowNode, isFrom: boolean) => Pos;
 export interface CanvasNodeOption {
     name: string;
     path?: Path2D;
@@ -24,6 +25,7 @@ export interface CanvasNodeOption {
     text?: string;
     drawCb?: Callback;
     rawVertexes?: RawVertexes;
+    updateLineCb?: UpdateLineCallback;
 }
 export declare class CanvasNode implements CanvasNodeOption {
     name: string;
@@ -40,6 +42,7 @@ export declare class CanvasNode implements CanvasNodeOption {
     drawCbs: Callback[];
     rawVertexes: RawVertexes;
     lines: ArrowNode[];
+    updateLineCb: UpdateLineCallback;
     private autoUpdateFields;
     private hoverInCb;
     private hoverOutCb;

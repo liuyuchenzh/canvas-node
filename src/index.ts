@@ -1,11 +1,12 @@
 import { Manager, ManagerOption } from './manager'
-import { CanvasNode, CanvasNodeOption, Pos, NodeEventCallback } from './node'
+import { CanvasNode, CanvasNodeOption, Pos, NodeEventCallback, UpdateLineCallback } from './node'
 import { Menu } from './menu'
 import { listenToNodeEvent, removeNodeEvent } from './helpers/nativeToNodeEvent'
 import { ArrowNode } from './arrow'
 import { addEvent, removeEvent } from './helpers/eventHelper'
 import { getClickedNode, getClickedLine, getClickedBox } from './helpers/isClicked'
 import { centralizePoint, placePointOnEdge } from './helpers/drawArrow'
+
 
 class Entry {
   static init(option: ManagerOption) {

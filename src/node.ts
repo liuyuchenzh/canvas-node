@@ -19,6 +19,11 @@ export type RawVertexes = [x, y, width, height]
 
 export type Callback = (node: CanvasNode) => any
 export type NodeEventCallback = (e: Event, node: CanvasNode) => any
+export type UpdateLineCallback = (
+  node: CanvasNode,
+  line: ArrowNode,
+  isFrom: boolean
+) => Pos
 
 export interface CanvasNodeOption {
   name: string
@@ -34,6 +39,7 @@ export interface CanvasNodeOption {
   text?: string
   drawCb?: Callback
   rawVertexes?: RawVertexes
+  updateLineCb?: UpdateLineCallback
 }
 
 function defaultData() {
@@ -44,6 +50,10 @@ function defaultData() {
     color: '#000',
     data: {}
   }
+}
+
+function isFn(fn) {
+  return typeof fn === 'function'
 }
 
 export class CanvasNode implements CanvasNodeOption {
@@ -61,6 +71,7 @@ export class CanvasNode implements CanvasNodeOption {
   drawCbs: Callback[] = []
   rawVertexes: RawVertexes
   lines: ArrowNode[] = []
+  updateLineCb: UpdateLineCallback
 
   // properties to be proxied
   private autoUpdateFields: string[] = [
@@ -89,7 +100,7 @@ export class CanvasNode implements CanvasNodeOption {
   }
 
   proxy() {
-    const inited = []
+    const finished: any[] = []
     this.autoUpdateFields.forEach(key => {
       Object.defineProperty(this, key, {
         get() {
@@ -97,8 +108,8 @@ export class CanvasNode implements CanvasNodeOption {
         },
         set(val) {
           this['$' + key] = val
-          if (!inited.includes(key)) {
-            return inited.push(key)
+          if (!finished.includes(key)) {
+            return finished.push(key)
           }
           // auto update view
           Batch.add(() => {
@@ -200,14 +211,26 @@ export class CanvasNode implements CanvasNodeOption {
     this.lines.push(line)
   }
 
+  /**
+   * there is a priority tree here
+   * own > Manager > default
+   */
   updateLinePos() {
     this.lines.forEach(line => {
       switch (this) {
         case line.from:
-          line.pos = centralizePoint(this)
+          line.pos = isFn(this.updateLineCb)
+            ? this.updateLineCb(this, line, true)
+            : isFn(Manager.updateLineCb)
+              ? Manager.updateLineCb(this, line, true)
+              : centralizePoint(this)
           break
         case line.to:
-          line.endPos = centralizePoint(this)
+          line.endPos = isFn(this.updateLineCb)
+            ? this.updateLineCb(this, line, false)
+            : isFn(Manager.updateLineCb)
+              ? Manager.updateLineCb(this, line, false)
+              : centralizePoint(this)
           break
       }
     })

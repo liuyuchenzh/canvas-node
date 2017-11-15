@@ -1,8 +1,9 @@
-import { CanvasNode, Pos } from './node'
+import { CanvasNode, Pos, UpdateLineCallback } from './node'
 import { ArrowNode } from './arrow'
 
 export interface ManagerOption {
   canvas: HTMLCanvasElement
+  updateLineCb?: UpdateLineCallback
 }
 
 export class Manager {
@@ -13,9 +14,10 @@ export class Manager {
   // all CanvasNode instances
   static list: CanvasNode[] = []
   static canvas: HTMLCanvasElement
+  static updateLineCb: UpdateLineCallback
 
   static init(option: ManagerOption) {
-    const { canvas } = option
+    const { canvas, updateLineCb } = option
     const size: Pos = {
       x: canvas.width,
       y: canvas.height
@@ -24,6 +26,7 @@ export class Manager {
     this.bindSize(size)
     this.bindCtx(ctx)
     this.bindCanvas(canvas)
+    this.updateLineCb = updateLineCb
   }
 
   static add(node: CanvasNode) {
