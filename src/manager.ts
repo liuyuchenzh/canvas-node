@@ -4,6 +4,7 @@ import { ArrowNode } from './arrow'
 export interface ManagerOption {
   canvas: HTMLCanvasElement
   updateLineCb?: UpdateLineCallback
+  arrowPath?: Path2D & CanvasFillRule
 }
 
 export class Manager {
@@ -15,9 +16,10 @@ export class Manager {
   static list: CanvasNode[] = []
   static canvas: HTMLCanvasElement
   static updateLineCb: UpdateLineCallback
+  static arrowPath: Path2D & CanvasFillRule
 
   static init(option: ManagerOption) {
-    const { canvas, updateLineCb } = option
+    const { canvas, updateLineCb, arrowPath } = option
     const size: Pos = {
       x: canvas.width,
       y: canvas.height
@@ -27,6 +29,7 @@ export class Manager {
     this.bindCtx(ctx)
     this.bindCanvas(canvas)
     this.updateLineCb = updateLineCb
+    this.arrowPath = arrowPath
   }
 
   static add(node: CanvasNode) {

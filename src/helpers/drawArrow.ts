@@ -7,10 +7,10 @@ const MARGIN_ERROR: number = 5
 function drawTriangle(): Path2D | CanvasFillRule {
   const triangle = new Path2D()
 
-  triangle.moveTo(0, 0)
-  triangle.lineTo(0, 5)
-  triangle.lineTo(15, 0)
-  triangle.lineTo(0, -5)
+  triangle.moveTo(-15, 0)
+  triangle.lineTo(-15, 5)
+  triangle.lineTo(0, 0)
+  triangle.lineTo(-15, -5)
   triangle.closePath()
   return triangle
 }

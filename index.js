@@ -140,10 +140,10 @@ function getClickedLine(pos) {
 var MARGIN_ERROR = 5;
 function drawTriangle() {
     var triangle = new Path2D();
-    triangle.moveTo(0, 0);
-    triangle.lineTo(0, 5);
-    triangle.lineTo(15, 0);
-    triangle.lineTo(0, -5);
+    triangle.moveTo(-15, 0);
+    triangle.lineTo(-15, 5);
+    triangle.lineTo(0, 0);
+    triangle.lineTo(-15, -5);
     triangle.closePath();
     return triangle;
 }
@@ -802,7 +802,7 @@ var Manager = (function () {
     function Manager() {
     }
     Manager.init = function (option) {
-        var canvas = option.canvas, updateLineCb = option.updateLineCb;
+        var canvas = option.canvas, updateLineCb = option.updateLineCb, arrowPath = option.arrowPath;
         var size = {
             x: canvas.width,
             y: canvas.height
@@ -812,6 +812,7 @@ var Manager = (function () {
         this.bindCtx(ctx);
         this.bindCanvas(canvas);
         this.updateLineCb = updateLineCb;
+        this.arrowPath = arrowPath;
     };
     Manager.add = function (node) {
         this.list.push(node);

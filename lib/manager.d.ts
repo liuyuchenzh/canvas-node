@@ -3,6 +3,7 @@ import { ArrowNode } from './arrow';
 export interface ManagerOption {
     canvas: HTMLCanvasElement;
     updateLineCb?: UpdateLineCallback;
+    arrowPath?: Path2D & CanvasFillRule;
 }
 export declare class Manager {
     static size: Pos;
@@ -10,6 +11,7 @@ export declare class Manager {
     static list: CanvasNode[];
     static canvas: HTMLCanvasElement;
     static updateLineCb: UpdateLineCallback;
+    static arrowPath: Path2D & CanvasFillRule;
     static init(option: ManagerOption): void;
     static add(node: CanvasNode): void;
     static bindSize(size: Pos): void;
