@@ -60,7 +60,7 @@ export class ArrowNode extends CanvasNode {
       this.pos,
       this.endPos,
       this.ratio,
-      this.arrowPath,
+      Manager.arrowPath || this.arrowPath,
       this.colorObj
     )
   }

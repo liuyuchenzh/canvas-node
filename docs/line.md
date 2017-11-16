@@ -6,7 +6,7 @@ ArrowNode inherit all methods from `CanvasNode`, and has some own ones.
 
 - option `<object>`: almost the same as the one for `CanvasNode`, with two more optional fields:
   - [ratio] `<number>`: place where the arrow should be on the line
-  - [arrowPath] `<Path2D>`: custom arrow shape. SHOULD BE POINTING UPWARDS.
+  - [arrowPath] `<Path2D>`: custom arrow shape. Should be pointing RIGHT.
 
 ## connect(from, to)
 

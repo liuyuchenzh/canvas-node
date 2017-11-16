@@ -13,6 +13,7 @@
   - canvas `<HTMLCanvasElement>`
   - [updateLineCb] `<function(box, line, isFrom)>`: define how to place the connecting line between two boxes.
   Details could be found [here](./updateLineCb.md).
+  - [arrowPath] `<Path2D>`: path for arrow on line. Details could be found [here](./arrowPath.md)
 
 ```js
 CanvasNode.init({

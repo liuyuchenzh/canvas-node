@@ -5,3 +5,7 @@ export function isUndef(input: any): boolean {
 export function isNull(input: any): boolean {
   return input === null
 }
+
+export function isFn(input: any): boolean {
+  return typeof input === 'function'
+}

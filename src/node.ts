@@ -5,6 +5,7 @@ import { centralizePoint } from './helpers/drawArrow'
 import { listenToNodeEvent, removeNodeEvent } from './helpers/nativeToNodeEvent'
 import { Batch } from './helpers/batch'
 import { tagFn } from './helpers/tagFn'
+import { isFn } from './helpers/types'
 
 export interface Pos {
   x: number
@@ -50,10 +51,6 @@ function defaultData() {
     color: '#000',
     data: {}
   }
-}
-
-function isFn(fn) {
-  return typeof fn === 'function'
 }
 
 export class CanvasNode implements CanvasNodeOption {
