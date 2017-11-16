@@ -112,6 +112,24 @@ return `{x: number, y: number}`
 - node `<CanvasNode>`: of which the point will be placed on.
 - [isStart]: if the point is starting point, default `true`.
 
+## CanvasNode.isConnected(node1, node2)
+
+- node1 `<CanvasNode>`
+- node2 `<CanvasNode>`
+
+return `<boolean>`
+
+## CanvasNode.isConnectedSeq(node1, node2[, isFromFirst])
+- node1 `<CanvasNode>`
+- node2 `<CanvasNode>`
+- [isFromFirst] `<boolean>`: whether `node1` is the starting node
+
+return `<boolean>`
+
+> The difference between `isConnected` and `isConnectedSeq` is that
+`isConnectedSeq` takes sequence into account. In other words, which one of the nodes is
+the starting one matters.
+
 ## CanvasNode.ArrowNode
 
 return the class of [`ArrowNode`](./line.md).

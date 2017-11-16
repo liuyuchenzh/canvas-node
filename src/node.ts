@@ -77,7 +77,9 @@ export class CanvasNode implements CanvasNodeOption {
     'style',
     'strokeStyle',
     'color',
-    'text'
+    'text',
+    'pos',
+    'endPos'
   ]
 
   private hoverInCb: NodeEventCallback[] = []
@@ -97,16 +99,17 @@ export class CanvasNode implements CanvasNodeOption {
   }
 
   proxy() {
-    const finished: any[] = []
     this.autoUpdateFields.forEach(key => {
       Object.defineProperty(this, key, {
         get() {
           return this['$' + key]
         },
         set(val) {
+          const oldVal: any = this['$' + key]
           this['$' + key] = val
-          if (!finished.includes(key)) {
-            return finished.push(key)
+          if (val === oldVal) return
+          if (key.toLowerCase().indexOf('pos') > -1) {
+            if (Array.isArray(val)) debugger
           }
           // auto update view
           Batch.add(() => {
@@ -138,7 +141,7 @@ export class CanvasNode implements CanvasNodeOption {
 
   $moveTo(pos: Pos) {
     this.updatePos(pos)
-    this.$draw()
+    // this.$draw()
     // so the line will be redrew with new from and to positions
     // tricky point is, every line is drew after node, so it will be updated later then its from and to node
     this.updateLinePos()

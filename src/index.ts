@@ -1,12 +1,16 @@
 import { Manager, ManagerOption } from './manager'
-import { CanvasNode, CanvasNodeOption, Pos, NodeEventCallback, UpdateLineCallback } from './node'
+import { CanvasNode, CanvasNodeOption, Pos, NodeEventCallback } from './node'
 import { Menu } from './menu'
 import { listenToNodeEvent, removeNodeEvent } from './helpers/nativeToNodeEvent'
 import { ArrowNode } from './arrow'
 import { addEvent, removeEvent } from './helpers/eventHelper'
-import { getClickedNode, getClickedLine, getClickedBox } from './helpers/isClicked'
+import {
+  getClickedNode,
+  getClickedLine,
+  getClickedBox
+} from './helpers/isClicked'
 import { centralizePoint, placePointOnEdge } from './helpers/drawArrow'
-
+import { isConnected, isConnectedSeq } from './helpers/isConnected'
 
 class Entry {
   static init(option: ManagerOption) {
@@ -45,6 +49,8 @@ class Entry {
   static getClickedBox = getClickedBox
   static centralizePoint = centralizePoint
   static placePointOnEdge = placePointOnEdge
+  static isConnected = isConnected
+  static isConnectedSeq = isConnectedSeq
   static ArrowNode = ArrowNode
   static Menu = Menu
   static Node = CanvasNode

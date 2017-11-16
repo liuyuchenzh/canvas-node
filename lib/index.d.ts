@@ -5,6 +5,7 @@ import { ArrowNode } from './arrow';
 import { addEvent, removeEvent } from './helpers/eventHelper';
 import { getClickedNode, getClickedLine, getClickedBox } from './helpers/isClicked';
 import { centralizePoint, placePointOnEdge } from './helpers/drawArrow';
+import { isConnected, isConnectedSeq } from './helpers/isConnected';
 declare class Entry {
     static init(option: ManagerOption): void;
     static drawBox(option: CanvasNodeOption): CanvasNode;
@@ -19,6 +20,8 @@ declare class Entry {
     static getClickedBox: typeof getClickedBox;
     static centralizePoint: typeof centralizePoint;
     static placePointOnEdge: typeof placePointOnEdge;
+    static isConnected: typeof isConnected;
+    static isConnectedSeq: typeof isConnectedSeq;
     static ArrowNode: typeof ArrowNode;
     static Menu: typeof Menu;
     static Node: typeof CanvasNode;

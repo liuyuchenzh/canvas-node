@@ -50,7 +50,7 @@ export class ArrowNode extends CanvasNode {
   // overRide
   $moveTo(end: Pos) {
     this.updateEndPos(end)
-    drawLine(this.ctx, this.pos, end, this.ratio, this.arrowPath, this.colorObj)
+    // this.$draw()
   }
 
   // overRide

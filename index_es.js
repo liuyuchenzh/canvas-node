@@ -472,6 +472,9 @@ function isUndef(input) {
 function isNull(input) {
     return input === null;
 }
+function isFn(input) {
+    return typeof input === 'function';
+}
 
 var PRIVATE_KEY$1 = 'canvas-node';
 var KEY_NAME = Symbol(PRIVATE_KEY$1);
@@ -538,9 +541,6 @@ function defaultData() {
         data: {}
     };
 }
-function isFn(fn) {
-    return typeof fn === 'function';
-}
 var CanvasNode = (function () {
     function CanvasNode(option) {
         this.drawCbs = [];
@@ -551,7 +551,9 @@ var CanvasNode = (function () {
             'style',
             'strokeStyle',
             'color',
-            'text'
+            'text',
+            'pos',
+            'endPos'
         ];
         this.hoverInCb = [];
         this.hoverOutCb = [];
@@ -566,7 +568,6 @@ var CanvasNode = (function () {
     }
     CanvasNode.prototype.proxy = function () {
         var _this = this;
-        var finished = [];
         this.autoUpdateFields.forEach(function (key) {
             Object.defineProperty(_this, key, {
                 get: function () {
@@ -574,9 +575,13 @@ var CanvasNode = (function () {
                 },
                 set: function (val) {
                     var _this = this;
+                    var oldVal = this['$' + key];
                     this['$' + key] = val;
-                    if (!finished.includes(key)) {
-                        return finished.push(key);
+                    if (val === oldVal)
+                        return;
+                    if (key.toLowerCase().indexOf('pos') > -1) {
+                        if (Array.isArray(val))
+                            debugger;
                     }
                     Batch.add(function () {
                         _this.draw();
@@ -604,7 +609,6 @@ var CanvasNode = (function () {
     };
     CanvasNode.prototype.$moveTo = function (pos) {
         this.updatePos(pos);
-        this.$draw();
         this.updateLinePos();
     };
     CanvasNode.prototype.$draw = function () {
@@ -769,10 +773,9 @@ var ArrowNode = (function (_super) {
     });
     ArrowNode.prototype.$moveTo = function (end) {
         this.updateEndPos(end);
-        drawLine(this.ctx, this.pos, end, this.ratio, this.arrowPath, this.colorObj);
     };
     ArrowNode.prototype.$draw = function () {
-        drawLine(this.ctx, this.pos, this.endPos, this.ratio, this.arrowPath, this.colorObj);
+        drawLine(this.ctx, this.pos, this.endPos, this.ratio, Manager.arrowPath || this.arrowPath, this.colorObj);
     };
     ArrowNode.prototype.updateEndPos = function (end) {
         this.endPos = end;
@@ -823,21 +826,45 @@ var Manager = (function () {
     Manager.draw = function () {
         this.ctx.clearRect(0, 0, this.size.x, this.size.y);
         this.ctx.save();
-        this.list.forEach(function (node) {
-            node.$draw();
-        });
+        this.list.forEach(function (node) { return node.$draw(); });
         this.ctx.restore();
     };
     Manager.moveTo = function (target, pos) {
         this.ctx.clearRect(0, 0, this.size.x, this.size.y);
         this.ctx.save();
-        this.list.forEach(function (node) {
-            var isArrowNode = node instanceof ArrowNode;
-            var $pos = node === target
-                ? pos
-                : isArrowNode ? node.endPos : node.pos;
-            node.$moveTo($pos);
+        var isArrowNode = target instanceof ArrowNode;
+        var list = this.list.reduce(function (last, node) {
+            if (node instanceof ArrowNode) {
+                last.line.push(node);
+            }
+            else {
+                last.box.push(node);
+            }
+            return last;
+        }, {
+            line: [],
+            box: []
         });
+        var updateBox = function () {
+            list.box.forEach(function (node) {
+                var $pos = node === target ? pos : node.pos;
+                node.$moveTo($pos);
+            });
+        };
+        var updateLine = function () {
+            list.line.forEach(function (line) {
+                var $pos = line === target ? pos : line.endPos;
+                line.$moveTo($pos);
+            });
+        };
+        if (isArrowNode) {
+            updateLine();
+            updateBox();
+        }
+        else {
+            updateBox();
+            updateLine();
+        }
         this.ctx.restore();
     };
     Manager.deleteNode = function (target) {
@@ -874,6 +901,29 @@ var Menu = (function (_super) {
     return Menu;
 }(CanvasNode));
 
+function hasArrowNode(node1, node2) {
+    return [node1, node2].some(function (node) { return node instanceof ArrowNode; });
+}
+function isConnected(node1, node2) {
+    if (hasArrowNode(node1, node2))
+        return false;
+    var lines = node1.lines;
+    return lines.some(function (line) {
+        var match = line.from === node1 ? line.to : line.from;
+        return match === node2;
+    });
+}
+function isConnectedSeq(node1, node2, isFromFirst) {
+    if (isFromFirst === void 0) { isFromFirst = true; }
+    if (hasArrowNode(node1, node2))
+        return false;
+    var lines = node1.lines;
+    return lines.some(function (line) {
+        var match = isFromFirst ? line.to : line.from;
+        return match === node2;
+    });
+}
+
 var Entry = (function () {
     function Entry() {
     }
@@ -907,6 +957,8 @@ var Entry = (function () {
     Entry.getClickedBox = getClickedBox;
     Entry.centralizePoint = centralizePoint;
     Entry.placePointOnEdge = placePointOnEdge;
+    Entry.isConnected = isConnected;
+    Entry.isConnectedSeq = isConnectedSeq;
     Entry.ArrowNode = ArrowNode;
     Entry.Menu = Menu;
     Entry.Node = CanvasNode;

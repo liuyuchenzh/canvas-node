@@ -52,10 +52,8 @@ export class Manager {
   static draw() {
     this.ctx.clearRect(0, 0, this.size.x, this.size.y)
     this.ctx.save()
-    // draw all node
-    this.list.forEach(node => {
-      node.$draw()
-    })
+    this.list.forEach(node => node.$draw())
+
     this.ctx.restore()
   }
 
@@ -63,16 +61,45 @@ export class Manager {
   static moveTo(target: CanvasNode, pos: Pos) {
     this.ctx.clearRect(0, 0, this.size.x, this.size.y)
     this.ctx.save()
-    this.list.forEach(node => {
-      // if it is an arrow
-      // then simply redraw it based on its endPos
-      const isArrowNode: boolean = node instanceof ArrowNode
-      const $pos: Pos =
-        node === target
-          ? pos
-          : isArrowNode ? (<ArrowNode>node).endPos : node.pos
-      node.$moveTo($pos)
-    })
+    const isArrowNode: boolean = target instanceof ArrowNode
+    type List = {
+      line: ArrowNode[]
+      box: CanvasNode[]
+    }
+    const list: List = this.list.reduce(
+      (last: List, node) => {
+        if (node instanceof ArrowNode) {
+          last.line.push(node)
+        } else {
+          last.box.push(node)
+        }
+        return last
+      },
+      {
+        line: [],
+        box: []
+      }
+    )
+    const updateBox = () => {
+      list.box.forEach(node => {
+        const $pos: Pos = node === target ? pos : node.pos
+        node.$moveTo($pos)
+      })
+    }
+
+    const updateLine = () => {
+      list.line.forEach(line => {
+        const $pos: Pos = line === target ? pos : line.endPos
+        line.$moveTo($pos)
+      })
+    }
+    if (isArrowNode) {
+      updateLine()
+      updateBox()
+    } else {
+      updateBox()
+      updateLine()
+    }
     this.ctx.restore()
   }
 
