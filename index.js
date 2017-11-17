@@ -352,8 +352,104 @@ function removeEvent(el, type, cb) {
     EventManager.remove(el, type, cb);
 }
 
+function generateDefaultState() {
+    return {
+        stalled: false,
+        args: [],
+        callbacks: []
+    };
+}
+class YEvent {
+    constructor() {
+        this.list = {};
+    }
+    getState(type) {
+        return this.list[type];
+    }
+    setState(type, val) {
+        this.list[type] = val;
+    }
+    $on(type, cb) {
+        if (!this.getState(type)) {
+            this.setState(type, generateDefaultState());
+        }
+        const state = this.getState(type);
+        state.callbacks.push(cb);
+        if (state.stalled) {
+            state.stalled = false;
+            return cb(...state.args);
+        }
+    }
+    $emit(type, ...args) {
+        const state = this.getState(type);
+        if (!state)
+            return;
+        state.callbacks.forEach(cb => cb(...args));
+    }
+    $off(type, cb) {
+        if (!cb) {
+            delete this.list[type];
+        }
+        else {
+            const cbs = this.list[type].callbacks;
+            this.list[type].callbacks = cbs.filter(callback => callback !== cb);
+        }
+    }
+    $always(type, ...args) {
+        const state = this.getState(type);
+        if (!state) {
+            this.list[type] = generateDefaultState();
+            const state = this.getState(type);
+            state.stalled = true;
+            state.args = args;
+            return;
+        }
+        if (state.stalled)
+            return;
+        state.callbacks.forEach(cb => cb(...args));
+    }
+    $once(type, cb) {
+        let called = false;
+        let fn = function (...args) {
+            !called && cb(...args);
+            called = true;
+        };
+        this.$on(type, fn);
+    }
+}
+const e = new YEvent();
+
 var NORMALIZE_LIST = ['mousemove', 'mouseout'];
-var target;
+var queue = [null, null];
+var inOutList = {
+    ins: [],
+    outs: []
+};
+e.$on('change', function (e$$1) {
+    var newTarget = getNewTarget();
+    var oldTarget = getOldTarget();
+    if (newTarget instanceof CanvasNode) {
+        inOutList.ins.forEach(function (cb) { return cb(e$$1, newTarget); });
+    }
+    if (oldTarget instanceof CanvasNode) {
+        inOutList.outs.forEach(function (cb) { return cb(e$$1, oldTarget); });
+    }
+});
+function updateTarget(target) {
+    if (queue.length > 1) {
+        queue.shift();
+    }
+    queue.push(target);
+}
+function hasChanged() {
+    return queue[0] !== queue[1];
+}
+function getOldTarget() {
+    return queue[0];
+}
+function getNewTarget() {
+    return queue[1];
+}
 function shouldNormalizeEvent(type) {
     return NORMALIZE_LIST.includes(type);
 }
@@ -371,31 +467,31 @@ function normalizeEventType(type) {
     return type;
 }
 function generateMouseMoveHandler(cb) {
-    return function handler(e) {
+    inOutList.ins.push(cb);
+    return function handler(e$$1) {
         var pos = {
-            x: e.offsetX,
-            y: e.offsetY
+            x: e$$1.offsetX,
+            y: e$$1.offsetY
         };
         var node = getClickedNode(pos);
-        if (!node)
-            return;
-        target = node;
-        cb(e, node);
+        updateTarget(node);
+        if (hasChanged()) {
+            e.$emit('change', e$$1);
+        }
     };
 }
 function generateMouseOutHandler(cb) {
-    return function handler(e) {
+    inOutList.outs.push(cb);
+    return function handler(e$$1) {
         var pos = {
-            x: e.offsetX,
-            y: e.offsetY
+            x: e$$1.offsetX,
+            y: e$$1.offsetY
         };
         var node = getClickedNode(pos);
-        if (node === target)
-            return;
-        if (!target)
-            return;
-        cb(e, target);
-        target = null;
+        updateTarget(node);
+        if (hasChanged()) {
+            e.$emit('change', e$$1);
+        }
     };
 }
 
@@ -544,12 +640,15 @@ function defaultData() {
         style: '#fff',
         strokeStyle: '#000',
         color: '#000',
-        data: {}
+        data: {},
+        display: true,
+        exist: true
     };
 }
 var CanvasNode = (function () {
     function CanvasNode(option) {
         this.drawCbs = [];
+        this.beforeDrawCbs = [];
         this.lines = [];
         this.autoUpdateFields = [
             'font',
@@ -559,11 +658,14 @@ var CanvasNode = (function () {
             'color',
             'text',
             'pos',
-            'endPos'
+            'endPos',
+            'display',
+            'exist'
         ];
         this.hoverInCb = [];
         this.hoverOutCb = [];
         this.clickCb = [];
+        this.watchList = {};
         this.proxy();
         Object.assign(this, defaultData(), option, {
             ctx: Manager.ctx,
@@ -583,6 +685,10 @@ var CanvasNode = (function () {
                     var _this = this;
                     var oldVal = this['$' + key];
                     this['$' + key] = val;
+                    var watchList = this.watchList[key];
+                    if (watchList) {
+                        watchList.forEach(function (cb) { return cb(val, oldVal); });
+                    }
                     if (val === oldVal)
                         return;
                     if (key.toLowerCase().indexOf('pos') > -1) {
@@ -618,13 +724,16 @@ var CanvasNode = (function () {
         this.updateLinePos();
     };
     CanvasNode.prototype.$draw = function () {
+        if (!this.display)
+            return;
+        this.invokeDrawCbAbs('beforeDrawCbs');
         this.ctx.save();
         this.ctx.translate(this.pos.x, this.pos.y);
         this.drawBorder();
         this.fill();
         this.fillText();
         this.ctx.restore();
-        this.invokeDrawCb();
+        this.invokeDrawCbAbs('drawCbs');
     };
     CanvasNode.prototype.draw = function () {
         Manager.draw();
@@ -663,13 +772,12 @@ var CanvasNode = (function () {
     CanvasNode.prototype.updateText = function (text) {
         this.text = text;
     };
-    CanvasNode.prototype.invokeDrawCb = function () {
+    CanvasNode.prototype.invokeDrawCbAbs = function (type) {
         var _this = this;
-        this.drawCbs.forEach(function (cb) {
+        this[type].forEach(function (cb) {
             _this.ctx.save();
             cb(_this);
             _this.ctx.restore();
-            console.log('new');
         });
     };
     CanvasNode.prototype.addLine = function (line) {
@@ -697,15 +805,23 @@ var CanvasNode = (function () {
         });
     };
     CanvasNode.prototype.remove = function (node) {
-        node && Manager.deleteNode(node);
+        if (node) {
+            node.destroy();
+        }
+        this.destroy();
+    };
+    CanvasNode.prototype.$remove = function () {
         Manager.deleteNode(this);
-        Manager.draw();
+        this.exist = false;
     };
     CanvasNode.prototype.forEach = function (fn) {
         Manager.list.forEach(fn);
     };
     CanvasNode.prototype.addDrawCb = function (cb) {
         this.drawCbs.push(cb);
+    };
+    CanvasNode.prototype.addBeforeDrawCb = function (cb) {
+        this.beforeDrawCbs.push(cb);
     };
     CanvasNode.prototype.hover = function (inCb, outCb) {
         var _this = this;
@@ -739,8 +855,20 @@ var CanvasNode = (function () {
         listenToNodeEvent('click', $clickCb);
         this.clickCb.push($clickCb);
     };
-    CanvasNode.prototype.destory = function () {
-        this.remove();
+    CanvasNode.prototype.hide = function () {
+        this.display = false;
+    };
+    CanvasNode.prototype.show = function () {
+        this.display = true;
+    };
+    CanvasNode.prototype.watch = function (key, cb) {
+        if (!this.watchList[key]) {
+            this.watchList[key] = [];
+        }
+        this.watchList[key].push(cb);
+    };
+    CanvasNode.prototype.destroy = function () {
+        this.$remove();
         this.hoverInCb.forEach(function (cb) {
             removeNodeEvent('mousemove', cb);
         });
@@ -883,7 +1011,10 @@ var Manager = (function () {
         var index = this.list.findIndex(function (node) { return node === target; });
         this.list.splice(index, 1);
         if (target.lines.length) {
-            target.lines.forEach(function (line) {
+            target.lines.filter(function (line) {
+                var connectedNode = line.from === target ? line.to : line.from;
+                var index = connectedNode.lines.findIndex(function ($line) { return $line === line; });
+                connectedNode.lines.splice(index, 1);
                 _this.list = _this.list.filter(function (node) { return node !== line; });
             });
         }

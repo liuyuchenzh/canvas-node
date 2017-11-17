@@ -11,6 +11,7 @@ export declare type RawVertexes = [x, y, width, height];
 export declare type Callback = (node: CanvasNode) => any;
 export declare type NodeEventCallback = (e: Event, node: CanvasNode) => any;
 export declare type UpdateLineCallback = (node: CanvasNode, line: ArrowNode, isFrom: boolean) => Pos;
+export declare type WatchCallback = <T extends keyof CanvasNode>(newVal: CanvasNode[T], oldVal: CanvasNode[T]) => any;
 export interface CanvasNodeOption {
     name: string;
     path?: Path2D;
@@ -23,7 +24,8 @@ export interface CanvasNodeOption {
     color?: string;
     font?: string;
     text?: string;
-    drawCb?: Callback;
+    drawCbs?: Callback[];
+    beforeDrawCbs?: Callback[];
     rawVertexes?: RawVertexes;
     updateLineCb?: UpdateLineCallback;
 }
@@ -39,7 +41,10 @@ export declare class CanvasNode implements CanvasNodeOption {
     strokeStyle: string;
     color: string;
     text: string;
+    display: boolean;
+    exist: boolean;
     drawCbs: Callback[];
+    beforeDrawCbs: Callback[];
     rawVertexes: RawVertexes;
     lines: ArrowNode[];
     updateLineCb: UpdateLineCallback;
@@ -47,6 +52,7 @@ export declare class CanvasNode implements CanvasNodeOption {
     private hoverInCb;
     private hoverOutCb;
     private clickCb;
+    private watchList;
     constructor(option: CanvasNodeOption);
     proxy(): void;
     readonly vertexes: number[];
@@ -59,13 +65,18 @@ export declare class CanvasNode implements CanvasNodeOption {
     fill(): void;
     fillText(text?: string): void;
     updateText(text: string): void;
-    invokeDrawCb(): void;
+    invokeDrawCbAbs(type: 'drawCbs' | 'beforeDrawCbs'): void;
     addLine(line: ArrowNode): void;
     updateLinePos(): void;
     remove(node?: CanvasNode): void;
+    $remove(): void;
     forEach(fn: (node: CanvasNode, i: number, list: CanvasNode[]) => any): void;
     addDrawCb(cb: Callback): void;
+    addBeforeDrawCb(cb: Callback): void;
     hover(inCb: NodeEventCallback, outCb?: NodeEventCallback): void;
     click(clickCb: NodeEventCallback): void;
-    destory(): void;
+    hide(): void;
+    show(): void;
+    watch<T extends keyof this>(key: T, cb: WatchCallback): void;
+    destroy(): void;
 }

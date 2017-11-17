@@ -30,7 +30,6 @@ function getVertexesForRect(raw) {
     var x = raw[0], y = raw[1], w = raw[2], h = raw[3];
     return [x, y, x + w, y, x + w, y + h, x, y + h];
 }
-//# sourceMappingURL=getVertexes.js.map
 
 var pointInPolygon = function (point, vs) {
     // ray-casting algorithm based on
@@ -61,7 +60,6 @@ function findFromRight(list, fn) {
         i--;
     }
 }
-//# sourceMappingURL=findFromRight.js.map
 
 var MARGIN_ERROR$1 = 4;
 function isPointInPolygon(vertexes, pos) {
@@ -132,7 +130,6 @@ function getClickedLine(pos) {
     var list = Manager.list.filter(function (node) { return node instanceof ArrowNode; });
     return findFromRight(list, function (node) { return isPointOnCurve(node.stops, pos); });
 }
-//# sourceMappingURL=isClicked.js.map
 
 var MARGIN_ERROR = 5;
 function drawTriangle() {
@@ -275,7 +272,6 @@ function calculatePos(dir, node) {
         y: y
     };
 }
-//# sourceMappingURL=drawArrow.js.map
 
 function random() {
     return parseInt(Date.now() + '' + Math.floor(Math.random() * 1000000), 16);
@@ -301,7 +297,6 @@ function isSameFn(fn1, fn2) {
     }
     return fn1 !== fn2;
 }
-//# sourceMappingURL=tagFn.js.map
 
 var EventManager = (function () {
     function EventManager() {
@@ -350,7 +345,6 @@ function addEvent(el, type, cb) {
 function removeEvent(el, type, cb) {
     EventManager.remove(el, type, cb);
 }
-//# sourceMappingURL=eventHelper.js.map
 
 function generateDefaultState() {
     return {
@@ -494,7 +488,6 @@ function generateMouseOutHandler(cb) {
         }
     };
 }
-//# sourceMappingURL=normalizeNodeEvent.js.map
 
 var NodeEventManager = (function () {
     function NodeEventManager() {
@@ -568,7 +561,6 @@ function removeNodeEvent(type, cb) {
         NodeEventManager.remove(type);
     }
 }
-//# sourceMappingURL=nativeToNodeEvent.js.map
 
 function isUndef(input) {
     return typeof input === 'undefined';
@@ -579,7 +571,6 @@ function isNull(input) {
 function isFn(input) {
     return typeof input === 'function';
 }
-//# sourceMappingURL=types.js.map
 
 var PRIVATE_KEY$1 = 'canvas-node';
 var KEY_NAME = Symbol(PRIVATE_KEY$1);
@@ -636,8 +627,6 @@ var Batch = (function () {
     Batch.list = [];
     return Batch;
 }());
-
-//# sourceMappingURL=batch.js.map
 
 function defaultData() {
     return {
@@ -939,8 +928,6 @@ var ArrowNode = (function (_super) {
     return ArrowNode;
 }(CanvasNode));
 
-//# sourceMappingURL=arrow.js.map
-
 var Manager = (function () {
     function Manager() {
     }
@@ -1042,8 +1029,6 @@ var Manager = (function () {
     return Manager;
 }());
 
-//# sourceMappingURL=manager.js.map
-
 var Menu = (function (_super) {
     __extends(Menu, _super);
     function Menu(option) {
@@ -1051,8 +1036,6 @@ var Menu = (function (_super) {
     }
     return Menu;
 }(CanvasNode));
-
-//# sourceMappingURL=menu.js.map
 
 function hasArrowNode(node1, node2) {
     return [node1, node2].some(function (node) { return node instanceof ArrowNode; });
@@ -1076,7 +1059,6 @@ function isConnectedSeq(node1, node2, isFromFirst) {
         return match === node2;
     });
 }
-//# sourceMappingURL=isConnected.js.map
 
 var Entry = (function () {
     function Entry() {
@@ -1139,7 +1121,5 @@ var Entry = (function () {
     Entry.Node = CanvasNode;
     return Entry;
 }());
-
-//# sourceMappingURL=index.js.map
 
 export default Entry;
