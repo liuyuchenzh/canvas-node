@@ -50,7 +50,8 @@ function defaultData() {
     style: '#fff',
     strokeStyle: '#000',
     color: '#000',
-    data: {}
+    data: {},
+    display: true
   }
 }
 
@@ -66,6 +67,7 @@ export class CanvasNode implements CanvasNodeOption {
   strokeStyle: string
   color: string
   text: string
+  display: boolean
   drawCbs: Callback[] = []
   beforeDrawCbs: Callback[] = []
   rawVertexes: RawVertexes
@@ -81,7 +83,8 @@ export class CanvasNode implements CanvasNodeOption {
     'color',
     'text',
     'pos',
-    'endPos'
+    'endPos',
+    'display'
   ]
 
   private hoverInCb: NodeEventCallback[] = []
@@ -150,6 +153,8 @@ export class CanvasNode implements CanvasNodeOption {
   }
 
   $draw() {
+    // to enable show/hide functionality
+    if (!this.display) return
     // custom callback
     this.invokeDrawCbAbs('beforeDrawCbs')
     // start default draw
@@ -290,6 +295,14 @@ export class CanvasNode implements CanvasNodeOption {
     tagFn($clickCb)
     listenToNodeEvent('click', $clickCb)
     this.clickCb.push($clickCb)
+  }
+
+  hide() {
+    this.display = false
+  }
+
+  show() {
+    this.display = true
   }
 
   destroy() {

@@ -55,6 +55,14 @@ node.moveTo({x: 100, y: 100})
 node.remove()
 ```
 
+## show()
+
+Display the instance.
+
+## hide()
+
+Hide the instance.
+
 ## hover(inCallback[, outCallback])
 
 - inCallback `<function(event, node)>`: called (multiple times) when the node is being hovered.

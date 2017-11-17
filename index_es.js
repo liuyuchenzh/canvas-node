@@ -30,7 +30,6 @@ function getVertexesForRect(raw) {
     var x = raw[0], y = raw[1], w = raw[2], h = raw[3];
     return [x, y, x + w, y, x + w, y + h, x, y + h];
 }
-//# sourceMappingURL=getVertexes.js.map
 
 var pointInPolygon = function (point, vs) {
     // ray-casting algorithm based on
@@ -61,7 +60,6 @@ function findFromRight(list, fn) {
         i--;
     }
 }
-//# sourceMappingURL=findFromRight.js.map
 
 var MARGIN_ERROR$1 = 4;
 function isPointInPolygon(vertexes, pos) {
@@ -132,7 +130,6 @@ function getClickedLine(pos) {
     var list = Manager.list.filter(function (node) { return node instanceof ArrowNode; });
     return findFromRight(list, function (node) { return isPointOnCurve(node.stops, pos); });
 }
-//# sourceMappingURL=isClicked.js.map
 
 var MARGIN_ERROR = 5;
 function drawTriangle() {
@@ -275,7 +272,6 @@ function calculatePos(dir, node) {
         y: y
     };
 }
-//# sourceMappingURL=drawArrow.js.map
 
 function random() {
     return parseInt(Date.now() + '' + Math.floor(Math.random() * 1000000), 16);
@@ -301,7 +297,6 @@ function isSameFn(fn1, fn2) {
     }
     return fn1 !== fn2;
 }
-//# sourceMappingURL=tagFn.js.map
 
 var EventManager = (function () {
     function EventManager() {
@@ -350,10 +345,105 @@ function addEvent(el, type, cb) {
 function removeEvent(el, type, cb) {
     EventManager.remove(el, type, cb);
 }
-//# sourceMappingURL=eventHelper.js.map
+
+function generateDefaultState() {
+    return {
+        stalled: false,
+        args: [],
+        callbacks: []
+    };
+}
+class YEvent {
+    constructor() {
+        this.list = {};
+    }
+    getState(type) {
+        return this.list[type];
+    }
+    setState(type, val) {
+        this.list[type] = val;
+    }
+    $on(type, cb) {
+        if (!this.getState(type)) {
+            this.setState(type, generateDefaultState());
+        }
+        const state = this.getState(type);
+        state.callbacks.push(cb);
+        if (state.stalled) {
+            state.stalled = false;
+            return cb(...state.args);
+        }
+    }
+    $emit(type, ...args) {
+        const state = this.getState(type);
+        if (!state)
+            return;
+        state.callbacks.forEach(cb => cb(...args));
+    }
+    $off(type, cb) {
+        if (!cb) {
+            delete this.list[type];
+        }
+        else {
+            const cbs = this.list[type].callbacks;
+            this.list[type].callbacks = cbs.filter(callback => callback !== cb);
+        }
+    }
+    $always(type, ...args) {
+        const state = this.getState(type);
+        if (!state) {
+            this.list[type] = generateDefaultState();
+            const state = this.getState(type);
+            state.stalled = true;
+            state.args = args;
+            return;
+        }
+        if (state.stalled)
+            return;
+        state.callbacks.forEach(cb => cb(...args));
+    }
+    $once(type, cb) {
+        let called = false;
+        let fn = function (...args) {
+            !called && cb(...args);
+            called = true;
+        };
+        this.$on(type, fn);
+    }
+}
+const e = new YEvent();
 
 var NORMALIZE_LIST = ['mousemove', 'mouseout'];
-var target;
+var queue = [null, null];
+var inOutList = {
+    ins: [],
+    outs: []
+};
+e.$on('change', function (e$$1) {
+    var newTarget = getNewTarget();
+    var oldTarget = getOldTarget();
+    if (newTarget instanceof CanvasNode) {
+        inOutList.ins.forEach(function (cb) { return cb(e$$1, newTarget); });
+    }
+    if (oldTarget instanceof CanvasNode) {
+        inOutList.outs.forEach(function (cb) { return cb(e$$1, oldTarget); });
+    }
+});
+function updateTarget(target) {
+    if (queue.length > 1) {
+        queue.shift();
+    }
+    queue.push(target);
+}
+function hasChanged() {
+    return queue[0] !== queue[1];
+}
+function getOldTarget() {
+    return queue[0];
+}
+function getNewTarget() {
+    return queue[1];
+}
 function shouldNormalizeEvent(type) {
     return NORMALIZE_LIST.includes(type);
 }
@@ -371,34 +461,33 @@ function normalizeEventType(type) {
     return type;
 }
 function generateMouseMoveHandler(cb) {
-    return function handler(e) {
+    inOutList.ins.push(cb);
+    return function handler(e$$1) {
         var pos = {
-            x: e.offsetX,
-            y: e.offsetY
+            x: e$$1.offsetX,
+            y: e$$1.offsetY
         };
         var node = getClickedNode(pos);
-        if (!node)
-            return;
-        target = node;
-        cb(e, node);
+        updateTarget(node);
+        if (hasChanged()) {
+            e.$emit('change', e$$1);
+        }
     };
 }
 function generateMouseOutHandler(cb) {
-    return function handler(e) {
+    inOutList.outs.push(cb);
+    return function handler(e$$1) {
         var pos = {
-            x: e.offsetX,
-            y: e.offsetY
+            x: e$$1.offsetX,
+            y: e$$1.offsetY
         };
         var node = getClickedNode(pos);
-        if (node === target)
-            return;
-        if (!target)
-            return;
-        cb(e, target);
-        target = null;
+        updateTarget(node);
+        if (hasChanged()) {
+            e.$emit('change', e$$1);
+        }
     };
 }
-//# sourceMappingURL=normalizeNodeEvent.js.map
 
 var NodeEventManager = (function () {
     function NodeEventManager() {
@@ -472,7 +561,6 @@ function removeNodeEvent(type, cb) {
         NodeEventManager.remove(type);
     }
 }
-//# sourceMappingURL=nativeToNodeEvent.js.map
 
 function isUndef(input) {
     return typeof input === 'undefined';
@@ -483,7 +571,6 @@ function isNull(input) {
 function isFn(input) {
     return typeof input === 'function';
 }
-//# sourceMappingURL=types.js.map
 
 var PRIVATE_KEY$1 = 'canvas-node';
 var KEY_NAME = Symbol(PRIVATE_KEY$1);
@@ -541,15 +628,14 @@ var Batch = (function () {
     return Batch;
 }());
 
-//# sourceMappingURL=batch.js.map
-
 function defaultData() {
     return {
         font: '14px Arial',
         style: '#fff',
         strokeStyle: '#000',
         color: '#000',
-        data: {}
+        data: {},
+        display: true
     };
 }
 var CanvasNode = (function () {
@@ -565,7 +651,8 @@ var CanvasNode = (function () {
             'color',
             'text',
             'pos',
-            'endPos'
+            'endPos',
+            'display'
         ];
         this.hoverInCb = [];
         this.hoverOutCb = [];
@@ -624,6 +711,8 @@ var CanvasNode = (function () {
         this.updateLinePos();
     };
     CanvasNode.prototype.$draw = function () {
+        if (!this.display)
+            return;
         this.invokeDrawCbAbs('beforeDrawCbs');
         this.ctx.save();
         this.ctx.translate(this.pos.x, this.pos.y);
@@ -748,6 +837,12 @@ var CanvasNode = (function () {
         listenToNodeEvent('click', $clickCb);
         this.clickCb.push($clickCb);
     };
+    CanvasNode.prototype.hide = function () {
+        this.display = false;
+    };
+    CanvasNode.prototype.show = function () {
+        this.display = true;
+    };
     CanvasNode.prototype.destroy = function () {
         this.remove();
         this.hoverInCb.forEach(function (cb) {
@@ -762,8 +857,6 @@ var CanvasNode = (function () {
     };
     return CanvasNode;
 }());
-
-//# sourceMappingURL=node.js.map
 
 function getDefaultOption() {
     return {
@@ -816,8 +909,6 @@ var ArrowNode = (function (_super) {
     };
     return ArrowNode;
 }(CanvasNode));
-
-//# sourceMappingURL=arrow.js.map
 
 var Manager = (function () {
     function Manager() {
@@ -928,8 +1019,6 @@ var Menu = (function (_super) {
     return Menu;
 }(CanvasNode));
 
-//# sourceMappingURL=menu.js.map
-
 function hasArrowNode(node1, node2) {
     return [node1, node2].some(function (node) { return node instanceof ArrowNode; });
 }
@@ -952,7 +1041,6 @@ function isConnectedSeq(node1, node2, isFromFirst) {
         return match === node2;
     });
 }
-//# sourceMappingURL=isConnected.js.map
 
 var Entry = (function () {
     function Entry() {
@@ -1015,7 +1103,5 @@ var Entry = (function () {
     Entry.Node = CanvasNode;
     return Entry;
 }());
-
-//# sourceMappingURL=index.js.map
 
 export default Entry;

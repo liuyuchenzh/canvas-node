@@ -25,5 +25,8 @@
     "dev": "rollup -c -w",
     "es": "rollup -c rollup.es.config.js -w",
     "build": "tsc -d --outDir ./lib && rollup -c && rollup -c rollup.es.config.js"
+  },
+  "dependencies": {
+    "y-event": "^0.2.0"
   }
 }

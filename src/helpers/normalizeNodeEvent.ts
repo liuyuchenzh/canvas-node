@@ -7,9 +7,53 @@
  */
 import { CanvasNode, Pos, NodeEventCallback } from '../node'
 import { getClickedNode } from './isClicked'
+import event from 'y-event'
 
 const NORMALIZE_LIST = ['mousemove', 'mouseout']
-let target: null | CanvasNode
+// in charge of keep track of hovering target
+const queue: [any, any] = [null, null]
+// manage mousemove && mouseout callbacks
+const inOutList = {
+  ins: [],
+  outs: []
+}
+
+// handle the change
+event.$on('change', e => {
+  const newTarget = getNewTarget()
+  const oldTarget = getOldTarget()
+  // the latest target is a node
+  // so it is 'moved in'
+  if (newTarget instanceof CanvasNode) {
+    inOutList.ins.forEach(cb => cb(e, newTarget))
+  }
+  // last target is a node
+  // so it is 'moved out'
+  if (oldTarget instanceof CanvasNode) {
+    inOutList.outs.forEach(cb => cb(e, oldTarget))
+  }
+})
+
+// always save the latest targets
+function updateTarget(target: any): void {
+  if (queue.length > 1) {
+    queue.shift()
+  }
+  queue.push(target)
+}
+
+// should trigger change event
+function hasChanged(): boolean {
+  return queue[0] !== queue[1]
+}
+
+function getOldTarget(): any {
+  return queue[0]
+}
+
+function getNewTarget(): any {
+  return queue[1]
+}
 
 export type EventHandler = (e: Event) => any
 
@@ -35,28 +79,31 @@ export function normalizeEventType(type: string) {
 }
 
 function generateMouseMoveHandler(cb: NodeEventCallback): EventHandler {
+  inOutList.ins.push(cb)
   return function handler(e: MouseEvent) {
     const pos: Pos = {
       x: e.offsetX,
       y: e.offsetY
     }
     const node: CanvasNode = getClickedNode(pos)
-    if (!node) return
-    target = node
-    cb(e, node)
+    updateTarget(node)
+    if (hasChanged()) {
+      event.$emit('change', e)
+    }
   }
 }
 
 function generateMouseOutHandler(cb: NodeEventCallback): EventHandler {
+  inOutList.outs.push(cb)
   return function handler(e: MouseEvent) {
     const pos: Pos = {
       x: e.offsetX,
       y: e.offsetY
     }
     const node: CanvasNode = getClickedNode(pos)
-    if (node === target) return
-    if (!target) return
-    cb(e, target)
-    target = null
+    updateTarget(node)
+    if (hasChanged()) {
+      event.$emit('change', e)
+    }
   }
 }
