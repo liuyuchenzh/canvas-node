@@ -11,6 +11,8 @@ style
 strokeStyle
 color
 text
+end
+endPos
 ```
 
 ## draw()
@@ -64,7 +66,7 @@ node.hover(() => {
 
 - callback `<function(event, node)>`: called (once) when the node is being clicked
   - event `<Event>`: native event.
-  - node `<CanvasNode>`: node being hovered.
+  - node `<CanvasNode>`: node being clicked.
 
 ```js
 node.click((e, target) => {

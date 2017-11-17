@@ -42,6 +42,18 @@ class Entry {
     line.connect(from, to)
   }
 
+  static get all(): CanvasNode[] {
+    return Manager.list
+  }
+
+  static get lines(): ArrowNode[] {
+    return Manager.list.filter(node => node instanceof ArrowNode) as ArrowNode[]
+  }
+
+  static get menus(): Menu[] {
+    return Manager.list.filter(node => node instanceof Menu)
+  }
+
   static nativeAddEvent = addEvent
   static nativeRemoveEvent = removeEvent
   static getClickedNode = getClickedNode

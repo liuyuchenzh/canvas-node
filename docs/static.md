@@ -141,3 +141,15 @@ return the class of `Menu`, which is just a subclass of [`CanvasNode`](./canvasN
 ## CanvasNode.Node
 
 return the class of [`CanvasNode`](./canvasNode.md).
+
+## CanvasNode.all
+
+return all the instances of `CanvasNode`.
+
+## CanvasNode.lines
+
+return all the instances of `ArrowNode`.
+
+## CanvasNode.menus
+
+return all the instances of `Menu`
