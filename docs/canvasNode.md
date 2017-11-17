@@ -14,7 +14,12 @@ text
 end
 endPos
 display
+exist
 ```
+
+Most parts of the list are straightforwards. One thing needs to point out is that
+`exist` stands for the existence of the instance.
+Therefore you can `watch` its changes to decide what to run when the instance is being destroyed.
 
 ## draw()
 

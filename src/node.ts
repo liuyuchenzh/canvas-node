@@ -55,7 +55,8 @@ function defaultData() {
     strokeStyle: '#000',
     color: '#000',
     data: {},
-    display: true
+    display: true,
+    exist: true
   }
 }
 
@@ -72,6 +73,7 @@ export class CanvasNode implements CanvasNodeOption {
   color: string
   text: string
   display: boolean
+  exist: boolean
   drawCbs: Callback[] = []
   beforeDrawCbs: Callback[] = []
   rawVertexes: RawVertexes
@@ -88,7 +90,8 @@ export class CanvasNode implements CanvasNodeOption {
     'text',
     'pos',
     'endPos',
-    'display'
+    'display',
+    'exist'
   ]
 
   private hoverInCb: NodeEventCallback[] = []
@@ -264,9 +267,15 @@ export class CanvasNode implements CanvasNodeOption {
   }
 
   remove(node?: CanvasNode) {
-    node && Manager.deleteNode(node)
+    if (node) {
+      node.destroy()
+    }
+    this.destroy()
+  }
+
+  $remove() {
     Manager.deleteNode(this)
-    Manager.draw()
+    this.exist = false
   }
 
   forEach(fn: (node: CanvasNode, i: number, list: CanvasNode[]) => any) {
@@ -325,7 +334,7 @@ export class CanvasNode implements CanvasNodeOption {
   }
 
   destroy() {
-    this.remove()
+    this.$remove()
     this.hoverInCb.forEach(cb => {
       removeNodeEvent('mousemove', cb)
     })
