@@ -657,6 +657,7 @@ var CanvasNode = (function () {
         this.hoverInCb = [];
         this.hoverOutCb = [];
         this.clickCb = [];
+        this.watchList = {};
         this.proxy();
         Object.assign(this, defaultData(), option, {
             ctx: Manager.ctx,
@@ -676,6 +677,10 @@ var CanvasNode = (function () {
                     var _this = this;
                     var oldVal = this['$' + key];
                     this['$' + key] = val;
+                    var watchList = this.watchList[key];
+                    if (watchList) {
+                        watchList.forEach(function (cb) { return cb(val, oldVal); });
+                    }
                     if (val === oldVal)
                         return;
                     if (key.toLowerCase().indexOf('pos') > -1) {
@@ -842,6 +847,12 @@ var CanvasNode = (function () {
     };
     CanvasNode.prototype.show = function () {
         this.display = true;
+    };
+    CanvasNode.prototype.watch = function (key, cb) {
+        if (!this.watchList[key]) {
+            this.watchList[key] = [];
+        }
+        this.watchList[key].push(cb);
     };
     CanvasNode.prototype.destroy = function () {
         this.remove();

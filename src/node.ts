@@ -25,6 +25,10 @@ export type UpdateLineCallback = (
   line: ArrowNode,
   isFrom: boolean
 ) => Pos
+export type WatchCallback = <T extends keyof CanvasNode>(
+  newVal: CanvasNode[T],
+  oldVal: CanvasNode[T]
+) => any
 
 export interface CanvasNodeOption {
   name: string
@@ -90,6 +94,9 @@ export class CanvasNode implements CanvasNodeOption {
   private hoverInCb: NodeEventCallback[] = []
   private hoverOutCb: NodeEventCallback[] = []
   private clickCb: NodeEventCallback[] = []
+  private watchList: {
+    [name: string]: WatchCallback[]
+  } = {}
 
   constructor(option: CanvasNodeOption) {
     this.proxy()
@@ -112,6 +119,11 @@ export class CanvasNode implements CanvasNodeOption {
         set(val) {
           const oldVal: any = this['$' + key]
           this['$' + key] = val
+          // run watch function
+          const watchList = this.watchList[key]
+          if (watchList) {
+            watchList.forEach(cb => cb(val, oldVal))
+          }
           if (val === oldVal) return
           if (key.toLowerCase().indexOf('pos') > -1) {
             if (Array.isArray(val)) debugger
@@ -303,6 +315,13 @@ export class CanvasNode implements CanvasNodeOption {
 
   show() {
     this.display = true
+  }
+
+  watch<T extends keyof this>(key: T, cb: WatchCallback) {
+    if (!this.watchList[key]) {
+      this.watchList[key] = []
+    }
+    this.watchList[key].push(cb)
   }
 
   destroy() {

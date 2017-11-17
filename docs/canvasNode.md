@@ -1,6 +1,6 @@
 # class CanvasNode
 
-CnavasNode will proxy a list of properties.\
+CanvasNode will proxy a list of properties.\
 Whenever you assign values to them, the view will be automatically updated, aka invoking `draw` method.\
 List showed below.
 
@@ -13,6 +13,7 @@ color
 text
 end
 endPos
+display
 ```
 
 ## draw()
@@ -62,6 +63,13 @@ Display the instance.
 ## hide()
 
 Hide the instance.
+
+## watch(key, callback)
+
+- key `<string>`: member of auto-update-list listed on the top of this page.
+- callback `<function(newVal, oldVal)>`: callback to react to change
+  - newVal `<any>`: new value for the `key` field.
+  - oldVal `<any>`: old value for the `key` field
 
 ## hover(inCallback[, outCallback])
 
