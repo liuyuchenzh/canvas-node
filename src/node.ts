@@ -38,7 +38,8 @@ export interface CanvasNodeOption {
   color?: string
   font?: string
   text?: string
-  drawCb?: Callback
+  drawCbs?: Callback[]
+  beforeDrawCbs?: Callback[]
   rawVertexes?: RawVertexes
   updateLineCb?: UpdateLineCallback
 }
@@ -66,6 +67,7 @@ export class CanvasNode implements CanvasNodeOption {
   color: string
   text: string
   drawCbs: Callback[] = []
+  beforeDrawCbs: Callback[] = []
   rawVertexes: RawVertexes
   lines: ArrowNode[] = []
   updateLineCb: UpdateLineCallback
@@ -148,6 +150,9 @@ export class CanvasNode implements CanvasNodeOption {
   }
 
   $draw() {
+    // custom callback
+    this.invokeDrawCbAbs('beforeDrawCbs')
+    // start default draw
     this.ctx.save()
     // move to the desired position
     this.ctx.translate(this.pos.x, this.pos.y)
@@ -157,9 +162,10 @@ export class CanvasNode implements CanvasNodeOption {
     this.fill()
     // fill text
     this.fillText()
-    // custom callback
-    this.invokeDrawCb()
     this.ctx.restore()
+    // end default draw
+    // custom callback
+    this.invokeDrawCbAbs('drawCbs')
   }
 
   draw() {
@@ -203,8 +209,12 @@ export class CanvasNode implements CanvasNodeOption {
     this.text = text
   }
 
-  invokeDrawCb(): void {
-    this.drawCbs.forEach(cb => cb(this))
+  invokeDrawCbAbs(type: 'drawCbs' | 'beforeDrawCbs'): void {
+    this[type].forEach(cb => {
+      this.ctx.save()
+      cb(this)
+      this.ctx.restore()
+    })
   }
 
   addLine(line: ArrowNode) {
@@ -250,6 +260,10 @@ export class CanvasNode implements CanvasNodeOption {
     this.drawCbs.push(cb)
   }
 
+  addBeforeDrawCb(cb: Callback) {
+    this.beforeDrawCbs.push(cb)
+  }
+
   hover(inCb: NodeEventCallback, outCb?: NodeEventCallback) {
     const $inCb = (e, node) => {
       if (node !== this) return
@@ -278,7 +292,7 @@ export class CanvasNode implements CanvasNodeOption {
     this.clickCb.push($clickCb)
   }
 
-  destory() {
+  destroy() {
     this.remove()
     this.hoverInCb.forEach(cb => {
       removeNodeEvent('mousemove', cb)

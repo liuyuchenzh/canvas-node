@@ -34,7 +34,8 @@ CanvasNode.init({
   - [style] `<string>`: fill style of the box.
   - [strokeStyle] `<string>`: stroke style of the box.
   - [font] `<string>`: font style of the text.
-  - [drawCb] `<function>`: custom callback for extra drawing.
+  - [beforeCbs] `<function[]>`: custom callback for extra drawing. Execute before all default drawing process.
+  - [drawCbs] `<function[]>`: custom callback for extra drawing. Execute after all default drawing process.
   - [updateLineCb] `<function(box, line, isFrom)>`: see [here](./updateLineCb.md)
 
 return `<CanvasNode>`

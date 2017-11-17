@@ -13,6 +13,9 @@ declare class Entry {
     static removeEvent(type: string): void;
     static drawLine(from: Pos, to?: Pos): ArrowNode;
     static connect(line: ArrowNode, from: CanvasNode, to: CanvasNode): void;
+    static readonly all: CanvasNode[];
+    static readonly lines: ArrowNode[];
+    static readonly menus: Menu[];
     static nativeAddEvent: typeof addEvent;
     static nativeRemoveEvent: typeof removeEvent;
     static getClickedNode: typeof getClickedNode;

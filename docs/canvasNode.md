@@ -37,6 +37,16 @@ Internally, this would also invoke `draw` method.
 node.moveTo({x: 100, y: 100})
 ```
 
+## addDrawCb(callback)
+
+- callback `<function(node)>`: drawing callback. You can draw anything.
+  - node `<CanvaseNode>`: node being drew on.
+  
+## addBeforeDrawCb(callback)
+
+- callback `<function(node)>`: drawing callback. You can draw anything.
+  - node `<CanvaseNode>`: node being drew on.
+
 ## remove([node])
 
 - node `<CanvasNode>`: another node to be removed with. If not provided, only the invoking one will be removed.
@@ -85,6 +95,6 @@ node.forEach(item => {
 node.draw() // no CanvasNode would remain
 ```
 
-## destory()
+## destroy()
 
-Like it suggests, destory the node
+Like it suggests, destroy the node

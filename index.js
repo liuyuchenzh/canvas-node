@@ -623,8 +623,8 @@ var CanvasNode = (function () {
         this.drawBorder();
         this.fill();
         this.fillText();
-        this.invokeDrawCb();
         this.ctx.restore();
+        this.invokeDrawCb();
     };
     CanvasNode.prototype.draw = function () {
         Manager.draw();
@@ -665,7 +665,12 @@ var CanvasNode = (function () {
     };
     CanvasNode.prototype.invokeDrawCb = function () {
         var _this = this;
-        this.drawCbs.forEach(function (cb) { return cb(_this); });
+        this.drawCbs.forEach(function (cb) {
+            _this.ctx.save();
+            cb(_this);
+            _this.ctx.restore();
+            console.log('new');
+        });
     };
     CanvasNode.prototype.addLine = function (line) {
         this.lines.push(line);
@@ -956,6 +961,27 @@ var Entry = (function () {
     Entry.connect = function (line, from, to) {
         line.connect(from, to);
     };
+    Object.defineProperty(Entry, "all", {
+        get: function () {
+            return Manager.list;
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Entry, "lines", {
+        get: function () {
+            return Manager.list.filter(function (node) { return node instanceof ArrowNode; });
+        },
+        enumerable: true,
+        configurable: true
+    });
+    Object.defineProperty(Entry, "menus", {
+        get: function () {
+            return Manager.list.filter(function (node) { return node instanceof Menu; });
+        },
+        enumerable: true,
+        configurable: true
+    });
     Entry.nativeAddEvent = addEvent;
     Entry.nativeRemoveEvent = removeEvent;
     Entry.getClickedNode = getClickedNode;
