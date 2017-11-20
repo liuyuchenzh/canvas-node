@@ -264,7 +264,7 @@ export class CanvasNode implements CanvasNodeOption {
   }
 
   remove(node?: CanvasNode) {
-    if (node) {
+    if (node && node instanceof CanvasNode) {
       node.destroy()
     }
     this.destroy()
