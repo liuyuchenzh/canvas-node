@@ -114,6 +114,8 @@ function distanceBetween2Points(x1, y1, x2, y2) {
 function getClickedNode(pos) {
     var list = Manager.list;
     return findFromRight(list, function (node) {
+        if (!node.display)
+            return false;
         if (node instanceof ArrowNode) {
             return isPointOnCurve(node.stops, pos);
         }
@@ -123,11 +125,11 @@ function getClickedNode(pos) {
     });
 }
 function getClickedBox(pos) {
-    var list = Manager.list.filter(function (node) { return !(node instanceof ArrowNode); });
+    var list = Manager.list.filter(function (node) { return !(node instanceof ArrowNode) && node.display; });
     return findFromRight(list, function (node) { return isPointInPolygon(node.vertexes, pos); });
 }
 function getClickedLine(pos) {
-    var list = Manager.list.filter(function (node) { return node instanceof ArrowNode; });
+    var list = Manager.list.filter(function (node) { return node instanceof ArrowNode && node.display; });
     return findFromRight(list, function (node) { return isPointOnCurve(node.stops, pos); });
 }
 
@@ -685,10 +687,6 @@ var CanvasNode = (function () {
                     }
                     if (val === oldVal)
                         return;
-                    if (key.toLowerCase().indexOf('pos') > -1) {
-                        if (Array.isArray(val))
-                            debugger;
-                    }
                     Batch.add(function () {
                         _this.draw();
                     }, this);
@@ -799,7 +797,7 @@ var CanvasNode = (function () {
         });
     };
     CanvasNode.prototype.remove = function (node) {
-        if (node) {
+        if (node && node instanceof CanvasNode) {
             node.destroy();
         }
         this.destroy();
