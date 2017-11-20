@@ -128,9 +128,6 @@ export class CanvasNode implements CanvasNodeOption {
             watchList.forEach(cb => cb(val, oldVal))
           }
           if (val === oldVal) return
-          if (key.toLowerCase().indexOf('pos') > -1) {
-            if (Array.isArray(val)) debugger
-          }
           // auto update view
           Batch.add(() => {
             this.draw()
