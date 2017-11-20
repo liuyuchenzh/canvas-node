@@ -133,7 +133,7 @@ function distanceBetween2Points(
  * @returns {CanvasNode}
  */
 export function getClickedNode(pos: Pos): CanvasNode {
-  const list: CanvasNode[] = Manager.list
+  const list: CanvasNode[] = Manager.list.filter(node => node.display)
   return findFromRight(list, node => {
     if (node instanceof ArrowNode) {
       return isPointOnCurve(node.stops, pos)
@@ -150,7 +150,7 @@ export function getClickedNode(pos: Pos): CanvasNode {
  */
 export function getClickedBox(pos: Pos): CanvasNode {
   const list: CanvasNode[] = Manager.list.filter(
-    node => !(node instanceof ArrowNode)
+    node => !(node instanceof ArrowNode) && node.display
   )
   return findFromRight(list, node => isPointInPolygon(node.vertexes, pos))
 }
@@ -162,7 +162,7 @@ export function getClickedBox(pos: Pos): CanvasNode {
  */
 export function getClickedLine(pos: Pos): ArrowNode {
   const list: ArrowNode[] = <ArrowNode[]>Manager.list.filter(
-    node => node instanceof ArrowNode
+    node => node instanceof ArrowNode && node.display
   )
   return findFromRight(list, node => isPointOnCurve(node.stops, pos))
 }
