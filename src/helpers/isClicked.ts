@@ -133,8 +133,9 @@ function distanceBetween2Points(
  * @returns {CanvasNode}
  */
 export function getClickedNode(pos: Pos): CanvasNode {
-  const list: CanvasNode[] = Manager.list.filter(node => node.display)
+  const list: CanvasNode[] = Manager.list
   return findFromRight(list, node => {
+    if (!node.display) return false
     if (node instanceof ArrowNode) {
       return isPointOnCurve(node.stops, pos)
     }
