@@ -14,6 +14,7 @@
   - [updateLineCb] `<function(box, line, isFrom)>`: define how to place the connecting line between two boxes.
   Details could be found [here](./updateLineCb.md).
   - [arrowPath] `<Path2D>`: path for arrow on line. Details could be found [here](./arrowPath.md)
+  - [useCubicBezier] `<boolean>`: default to false and use quadratic Bezier curves.
 
 ```js
 CanvasNode.init({
@@ -34,7 +35,7 @@ CanvasNode.init({
   - [style] `<string>`: fill style of the box.
   - [strokeStyle] `<string>`: stroke style of the box.
   - [font] `<string>`: font style of the text.
-  - [beforeCbs] `<function[]>`: custom callback for extra drawing. Execute before all default drawing process.
+  - [beforeDrawCbs] `<function[]>`: custom callback for extra drawing. Execute before all default drawing process.
   - [drawCbs] `<function[]>`: custom callback for extra drawing. Execute after all default drawing process.
   - [updateLineCb] `<function(box, line, isFrom)>`: see [here](./updateLineCb.md)
 
