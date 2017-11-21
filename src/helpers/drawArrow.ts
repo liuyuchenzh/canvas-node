@@ -1,6 +1,11 @@
 import { CanvasNode, Pos } from '../node'
-import { getDirective, simulateCurve } from './isClicked'
+import { getDirective, simulateCurve } from './quadraticCurve'
 import { Color } from '../arrow'
+import {
+  getControlPoints,
+  getDirForBezierCurve,
+  simulateBezierCurve
+} from './cubicCurve'
 
 const MARGIN_ERROR: number = 5
 
@@ -252,4 +257,74 @@ function calculatePos(dir: string, node: CanvasNode): Pos {
     x,
     y
   }
+}
+
+export function drawCubicBezier(
+  ctx: CanvasRenderingContext2D,
+  start: Pos,
+  end: Pos,
+  ratio: number,
+  arrowPath: Path2D & CanvasFillRule,
+  colorObj: Color
+) {
+  const { style, strokeStyle } = colorObj
+  const { x: startX, y: startY } = start
+
+  const { x: endX, y: endY } = end
+
+  const $endX: number = normalizeEndPoint(startX, endX)
+  const $endY: number = normalizeEndPoint(startY, endY)
+
+  ctx.beginPath()
+  ctx.moveTo(startX, startY)
+  const controlPoints: [Pos, Pos] = getControlPoints(start, end)
+  const { x: c1x, y: c1y } = controlPoints[0]
+  const { x: c2x, y: c2y } = controlPoints[1]
+  ctx.bezierCurveTo(c1x, c1y, c2x, c2y, $endX, $endY)
+  // get where to put arrow
+  const arrowX: number = simulateBezierCurve(
+    startX,
+    c1x,
+    c2x,
+    $endX,
+    fixRatio(ratio)
+  )
+  const arrowY: number = simulateBezierCurve(
+    startY,
+    c1y,
+    c2y,
+    $endY,
+    fixRatio(ratio)
+  )
+  // calculate tan
+  const arrowDirX: number = getDirForBezierCurve(
+    startX,
+    c1x,
+    c2x,
+    $endX,
+    fixRatio(ratio)
+  )
+  const arrowDirY: number = getDirForBezierCurve(
+    startY,
+    c1y,
+    c2y,
+    $endY,
+    fixRatio(ratio)
+  )
+  const tan: number = arrowDirY / arrowDirX
+  // get rotate angle
+  const angle: number = Math.atan(tan)
+  const goLeft: boolean = endX < startX
+  const rotateAngle: number = goLeft ? angle - Math.PI : angle
+  ctx.lineWidth = 2
+  ctx.strokeStyle = strokeStyle
+  ctx.stroke()
+  ctx.save()
+  ctx.translate(arrowX, arrowY)
+  ctx.rotate(rotateAngle)
+  const triangle = drawTriangle()
+  ctx.fillStyle = style
+  // use custom arrow path or default one
+  ctx.fill((arrowPath as CanvasFillRule) || (triangle as CanvasFillRule))
+  ctx.restore()
 }

@@ -1,5 +1,5 @@
 import { CanvasNode, CanvasNodeOption, Pos } from './node'
-import { drawLine } from './helpers/drawArrow'
+import { drawLine, drawCubicBezier } from './helpers/drawArrow'
 import { Manager } from './manager'
 import { calculateStop } from './helpers/drawArrow'
 
@@ -55,7 +55,8 @@ export class ArrowNode extends CanvasNode {
 
   // overRide
   $draw() {
-    drawLine(
+    const fn = Manager.useCubicBezier ? drawCubicBezier : drawLine
+    fn(
       this.ctx,
       this.pos,
       this.endPos,

@@ -5,6 +5,7 @@ export interface ManagerOption {
   canvas: HTMLCanvasElement
   updateLineCb?: UpdateLineCallback
   arrowPath?: Path2D & CanvasFillRule
+  useCubicBezier?: boolean | null
 }
 
 export class Manager {
@@ -17,9 +18,10 @@ export class Manager {
   static canvas: HTMLCanvasElement
   static updateLineCb: UpdateLineCallback
   static arrowPath: Path2D & CanvasFillRule
+  static useCubicBezier: boolean = false
 
-  static init (option: ManagerOption) {
-    const {canvas, updateLineCb, arrowPath} = option
+  static init(option: ManagerOption) {
+    const { canvas, updateLineCb, arrowPath, useCubicBezier } = option
     const size: Pos = {
       x: canvas.width,
       y: canvas.height
@@ -30,26 +32,27 @@ export class Manager {
     this.bindCanvas(canvas)
     this.updateLineCb = updateLineCb
     this.arrowPath = arrowPath
+    this.useCubicBezier = !!useCubicBezier
   }
 
-  static add (node: CanvasNode) {
+  static add(node: CanvasNode) {
     this.list.push(node)
   }
 
-  static bindSize (size: Pos) {
+  static bindSize(size: Pos) {
     this.size = size
   }
 
-  static bindCtx (ctx: CanvasRenderingContext2D) {
+  static bindCtx(ctx: CanvasRenderingContext2D) {
     this.ctx = ctx
   }
 
-  static bindCanvas (canvas: HTMLCanvasElement) {
+  static bindCanvas(canvas: HTMLCanvasElement) {
     this.canvas = canvas
   }
 
   // draw every thing
-  static draw () {
+  static draw() {
     this.ctx.clearRect(0, 0, this.size.x, this.size.y)
     this.ctx.save()
     this.list.forEach(node => node.$draw())
@@ -58,7 +61,7 @@ export class Manager {
   }
 
   // move one node
-  static moveTo (target: CanvasNode, pos: Pos) {
+  static moveTo(target: CanvasNode, pos: Pos) {
     this.ctx.clearRect(0, 0, this.size.x, this.size.y)
     this.ctx.save()
     const isArrowNode: boolean = target instanceof ArrowNode
@@ -104,7 +107,7 @@ export class Manager {
   }
 
   // delete the specific node
-  static deleteNode (target: CanvasNode) {
+  static deleteNode(target: CanvasNode) {
     const index: number = this.list.findIndex(node => node === target)
     this.list.splice(index, 1)
     // if the node has lines connect to it
@@ -112,8 +115,11 @@ export class Manager {
     if (target.lines.length) {
       target.lines.filter(line => {
         // find the connected node the delete the line from it
-        const connectedNode: CanvasNode = line.from === target ? line.to : line.from
-        const index: number = connectedNode.lines.findIndex($line => $line === line)
+        const connectedNode: CanvasNode =
+          line.from === target ? line.to : line.from
+        const index: number = connectedNode.lines.findIndex(
+          $line => $line === line
+        )
         connectedNode.lines.splice(index, 1)
         // delete the line from all
         this.list = this.list.filter(node => node !== line)
@@ -127,7 +133,7 @@ export class Manager {
     }
   }
 
-  static deleteConnectedBox (line: ArrowNode) {
+  static deleteConnectedBox(line: ArrowNode) {
     if (!line.to || !line.from) return
     const fromNode: CanvasNode = line.from
     const toNode: CanvasNode = line.to
