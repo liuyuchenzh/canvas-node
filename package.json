@@ -3,7 +3,7 @@
   "version": "0.3.12",
   "description": "Use oject to represent canvas drawings",
   "main": "index.js",
-  "module": "index_es.js",
+  "module": "lib/index.js",
   "types": "lib/index.d.ts",
   "repository": "https://github.com/liuyuchenzh/canvas-node.git",
   "bugs": {
@@ -23,8 +23,7 @@
   },
   "scripts": {
     "dev": "rollup -c -w",
-    "es": "rollup -c rollup.es.config.js -w",
-    "build": "tsc -d --outDir ./lib && rollup -c && rollup -c rollup.es.config.js"
+    "build": "tsc -d && rollup -c"
   },
   "dependencies": {
     "y-event": "^0.2.0"
