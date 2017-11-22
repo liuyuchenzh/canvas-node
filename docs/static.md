@@ -2,7 +2,7 @@
 
 > `CanvasNode` means two thing in this doc.
 > One is the exposed object with all the methods described below.
-> Anthoer one is internal class, defination of which can be found [here](./canvasNode.md).
+> Another one is internal class, definition of which can be found [here](./canvasNode.md).
 > Should be easy to tell which is which based on the context.
 >
 > And here you can find out what is [`ArrowNode`](./line.md)
@@ -15,6 +15,8 @@
   Details could be found [here](./updateLineCb.md).
   - [arrowPath] `<Path2D>`: path for arrow on line. Details could be found [here](./arrowPath.md)
   - [useCubicBezier] `<boolean>`: default to false and use quadratic Bezier curves.
+  - [safePointOnLine] `<boolean>`: use old-fashioned point-to-point process to detect whether a point is on a specific line.
+  Default to `false`, and use binary search.
 
 ```js
 CanvasNode.init({
