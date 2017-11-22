@@ -67,6 +67,70 @@ function findFromRight(list, fn) {
     }
 }
 
+function simulateBezierCurve(p1, p2, p3, p4, t) {
+    return (Math.pow(1 - t, 3) * p1 +
+        3 * Math.pow(1 - t, 2) * t * p2 +
+        3 * (1 - t) * Math.pow(t, 2) * p3 +
+        Math.pow(t, 3) * p4);
+}
+function getDirForBezierCurve(p1, p2, p3, p4, t) {
+    return (3 * Math.pow(1 - t, 2) * (p2 - p1) +
+        6 * (1 - t) * t * (p3 - p2) +
+        3 * Math.pow(t, 2) * (p4 - p3));
+}
+function join(p1, p2, ratio) {
+    if (ratio === void 0) { ratio = 0.5; }
+    return p1 + (p2 - p1) * ratio;
+}
+function getControlPoints(start, end) {
+    var startX = start.x, startY = start.y;
+    var endX = end.x, endY = end.y;
+    var c1x = startX;
+    var c1y = join(startY, endY, 0.33);
+    var c2x = endX;
+    var c2y = join(startY, endY, 0.66);
+    return [
+        {
+            x: c1x,
+            y: c1y
+        },
+        {
+            x: c2x,
+            y: c2y
+        }
+    ];
+}
+function isPointOnBezierCurve(start, end, point) {
+    var startX = start.x, startY = start.y;
+    var endX = end.x, endY = end.y;
+    var controlPoints = getControlPoints(start, end);
+    var _a = controlPoints[0], c1x = _a.x, c1y = _a.y;
+    var _b = controlPoints[1], c2x = _b.x, c2y = _b.y;
+    return isPointOnLine(point, 0, 1, 0, simulateBezierCurve, {
+        x: [startX, c1x, c2x, endX],
+        y: [startY, c1y, c2y, endY]
+    });
+}
+
+function isPointOnCurveOld(point, points) {
+    var pointsNum = points.x.length;
+    var numOfTest = Math.floor(distanceBetween2Points(points.x[0], points.y[0], points.x[pointsNum - 1], points.y[pointsNum - 1]) / 2);
+    var $numOfTest = getLimitedExamTimes(numOfTest);
+    var inc = 1 / $numOfTest;
+    var t = inc;
+    var fn = Manager.useCubicBezier
+        ? simulateBezierCurve
+        : simulateCurve;
+    while (t < 1) {
+        var lineX = fn.apply(void 0, points.x.concat([t]));
+        var lineY = fn.apply(void 0, points.y.concat([t]));
+        if (distanceBetween2Points(point.x, point.y, lineX, lineY) < MARGIN_ERROR$1)
+            return true;
+        t += inc;
+    }
+    return false;
+}
+
 var MARGIN_ERROR$1 = 4;
 function isPointInPolygon(vertexes, pos) {
     var poly = convertToPoly(vertexes);
@@ -85,34 +149,6 @@ function convertToPoly(vertexes) {
         return last;
     }, []);
 }
-function isPointOnCurve(poly, pos) {
-    if (poly.length !== 3) {
-        console.error('only support Quadratic Bézier curves for now');
-        return false;
-    }
-    var x = pos.x, y = pos.y;
-    var start = poly[0], control = poly[1], end = poly[2];
-    var startX = start[0], startY = start[1];
-    var controlX = control[0], controlY = control[1];
-    var endX = end[0], endY = end[1];
-    var numOfTest = Math.floor(distanceBetween2Points(startX, startY, endX, endY)) / 2;
-    var inc = 1 / numOfTest;
-    var t = inc;
-    while (t < 1) {
-        var lineX = simulateCurve(startX, controlX, endX, t);
-        var lineY = simulateCurve(startY, controlY, endY, t);
-        if (distanceBetween2Points(x, y, lineX, lineY) < MARGIN_ERROR$1)
-            return true;
-        t += inc;
-    }
-    return false;
-}
-function simulateCurve(p0, p1, p2, t) {
-    return Math.pow(1 - t, 2) * p0 + 2 * (1 - t) * t * p1 + Math.pow(t, 2) * p2;
-}
-function getDirective(p0, p1, p2, t) {
-    return 2 * (1 - t) * (p1 - p0) + 2 * t * (p2 - p1);
-}
 function distanceBetween2Points(x1, y1, x2, y2) {
     var squareDis = Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2);
     return Math.pow(squareDis, 0.5);
@@ -123,7 +159,12 @@ function getClickedNode(pos) {
         if (!node.display)
             return false;
         if (node instanceof ArrowNode) {
-            return isPointOnCurve(node.stops, pos);
+            if (Manager.useCubicBezier) {
+                return isPointOnBezierCurve(node.pos, node.endPos, pos);
+            }
+            else {
+                return isPointOnCurve(node.stops, pos);
+            }
         }
         if (!node.vertexes)
             return false;
@@ -136,7 +177,103 @@ function getClickedBox(pos) {
 }
 function getClickedLine(pos) {
     var list = Manager.list.filter(function (node) { return node instanceof ArrowNode && node.display; });
-    return findFromRight(list, function (node) { return isPointOnCurve(node.stops, pos); });
+    return findFromRight(list, function (node) {
+        if (!preExamForLine(node, pos))
+            return false;
+        if (Manager.useCubicBezier) {
+            return isPointOnBezierCurve(node.pos, node.endPos, pos);
+        }
+        else {
+            return isPointOnCurve(node.stops, pos);
+        }
+    });
+}
+function formLineRect(line) {
+    var _a = line.pos, startX = _a.x, startY = _a.y;
+    var _b = line.endPos, endX = _b.x, endY = _b.y;
+    var $startX = Math.min(startX, endX);
+    var $startY = Math.min(startY, endY);
+    var width = Math.abs(startX - endX);
+    var height = Math.abs(startY - endY);
+    return [$startX, $startY, width, height];
+}
+function preExamForLine(line, pos) {
+    return isPointInPolygon(formLineRect(line), pos);
+}
+function avg(x, y, fix) {
+    if (fix === void 0) { fix = 2; }
+    return +((x + y) / 2).toFixed(fix);
+}
+var DIFF_MARGIN = 2;
+function binarySearch(point, start, end, count, curFn, fnArgs, limit) {
+    if (limit === void 0) { limit = 100; }
+    if (count > limit)
+        return false;
+    var pointsNum = fnArgs.x.length;
+    var goRight = fnArgs.x[pointsNum - 1] > fnArgs.x[0];
+    var mid = avg(start, end, 4);
+    var xPointOnCurve = curFn.apply(void 0, fnArgs.x.concat([mid]));
+    var diff = point.x - xPointOnCurve;
+    var absDiff = Math.abs(diff);
+    var newBoundary;
+    var firstHalf = [start, mid];
+    var secondHalf = [mid, end];
+    if (absDiff < DIFF_MARGIN) {
+        var yPointOnCurve = curFn.apply(void 0, fnArgs.y.concat([mid]));
+        var diffY = point.y - yPointOnCurve;
+        var absDiffY = Math.abs(diffY);
+        if (absDiffY < DIFF_MARGIN) {
+            return true;
+        }
+        else {
+            var goUp = fnArgs.y[pointsNum - 1] < fnArgs.y[0];
+            newBoundary =
+                diffY > 0
+                    ? goUp ? firstHalf : secondHalf
+                    : goUp ? secondHalf : firstHalf;
+        }
+    }
+    else {
+        newBoundary =
+            diff > 0
+                ? goRight ? secondHalf : firstHalf
+                : goRight ? firstHalf : secondHalf;
+    }
+    return binarySearch(point, newBoundary[0], newBoundary[1], count + 1, curFn, fnArgs, limit);
+}
+function isPointOnLine(point, start, end, count, curFn, fnArgs, limit) {
+    if (limit === void 0) { limit = 100; }
+    if (Manager.safePointOnLine) {
+        return isPointOnCurveOld(point, fnArgs);
+    }
+    else {
+        return binarySearch(point, start, end, count, curFn, fnArgs, limit);
+    }
+}
+
+function simulateCurve(p0, p1, p2, t) {
+    return Math.pow(1 - t, 2) * p0 + 2 * (1 - t) * t * p1 + Math.pow(t, 2) * p2;
+}
+function getDirective(p0, p1, p2, t) {
+    return 2 * (1 - t) * (p1 - p0) + 2 * t * (p2 - p1);
+}
+function getLimitedExamTimes(times, limit) {
+    if (limit === void 0) { limit = 150; }
+    return Math.min(times, limit);
+}
+function isPointOnCurve(poly, pos) {
+    if (poly.length !== 3) {
+        console.error('only support Quadratic Bézier curves for now');
+        return false;
+    }
+    var start = poly[0], control = poly[1], end = poly[2];
+    var startX = start[0], startY = start[1];
+    var controlX = control[0], controlY = control[1];
+    var endX = end[0], endY = end[1];
+    return isPointOnLine(pos, 0, 1, 0, simulateCurve, {
+        x: [startX, controlX, endX],
+        y: [startY, controlY, endY]
+    });
 }
 
 var MARGIN_ERROR = 5;
@@ -279,6 +416,37 @@ function calculatePos(dir, node) {
         x: x,
         y: y
     };
+}
+function drawCubicBezier(ctx, start, end, ratio, arrowPath, colorObj) {
+    var style = colorObj.style, strokeStyle = colorObj.strokeStyle;
+    var startX = start.x, startY = start.y;
+    var endX = end.x, endY = end.y;
+    var $endX = normalizeEndPoint(startX, endX);
+    var $endY = normalizeEndPoint(startY, endY);
+    ctx.beginPath();
+    ctx.moveTo(startX, startY);
+    var controlPoints = getControlPoints(start, end);
+    var _a = controlPoints[0], c1x = _a.x, c1y = _a.y;
+    var _b = controlPoints[1], c2x = _b.x, c2y = _b.y;
+    ctx.bezierCurveTo(c1x, c1y, c2x, c2y, $endX, $endY);
+    var arrowX = simulateBezierCurve(startX, c1x, c2x, $endX, fixRatio(ratio));
+    var arrowY = simulateBezierCurve(startY, c1y, c2y, $endY, fixRatio(ratio));
+    var arrowDirX = getDirForBezierCurve(startX, c1x, c2x, $endX, fixRatio(ratio));
+    var arrowDirY = getDirForBezierCurve(startY, c1y, c2y, $endY, fixRatio(ratio));
+    var tan = arrowDirY / arrowDirX;
+    var angle = Math.atan(tan);
+    var goLeft = endX < startX;
+    var rotateAngle = goLeft ? angle - Math.PI : angle;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = strokeStyle;
+    ctx.stroke();
+    ctx.save();
+    ctx.translate(arrowX, arrowY);
+    ctx.rotate(rotateAngle);
+    var triangle = drawTriangle();
+    ctx.fillStyle = style;
+    ctx.fill(arrowPath || triangle);
+    ctx.restore();
 }
 
 function random() {
@@ -912,7 +1080,8 @@ var ArrowNode = (function (_super) {
         this.updateEndPos(end);
     };
     ArrowNode.prototype.$draw = function () {
-        drawLine(this.ctx, this.pos, this.endPos, this.ratio, Manager.arrowPath || this.arrowPath, this.colorObj);
+        var fn = Manager.useCubicBezier ? drawCubicBezier : drawLine;
+        fn(this.ctx, this.pos, this.endPos, this.ratio, Manager.arrowPath || this.arrowPath, this.colorObj);
     };
     ArrowNode.prototype.updateEndPos = function (end) {
         this.endPos = end;
@@ -936,29 +1105,22 @@ var Manager = (function () {
     function Manager() {
     }
     Manager.init = function (option) {
-        var canvas = option.canvas, updateLineCb = option.updateLineCb, arrowPath = option.arrowPath;
+        var canvas = option.canvas, updateLineCb = option.updateLineCb, arrowPath = option.arrowPath, useCubicBezier = option.useCubicBezier, safePointOnLine = option.safePointOnLine;
         var size = {
             x: canvas.width,
             y: canvas.height
         };
         var ctx = canvas.getContext('2d');
-        this.bindSize(size);
-        this.bindCtx(ctx);
-        this.bindCanvas(canvas);
+        this.size = size;
+        this.ctx = ctx;
+        this.canvas = canvas;
         this.updateLineCb = updateLineCb;
         this.arrowPath = arrowPath;
+        this.useCubicBezier = !!useCubicBezier;
+        this.safePointOnLine = !!safePointOnLine;
     };
     Manager.add = function (node) {
         this.list.push(node);
-    };
-    Manager.bindSize = function (size) {
-        this.size = size;
-    };
-    Manager.bindCtx = function (ctx) {
-        this.ctx = ctx;
-    };
-    Manager.bindCanvas = function (canvas) {
-        this.canvas = canvas;
     };
     Manager.draw = function () {
         this.ctx.clearRect(0, 0, this.size.x, this.size.y);
@@ -1030,6 +1192,8 @@ var Manager = (function () {
         });
     };
     Manager.list = [];
+    Manager.useCubicBezier = false;
+    Manager.safePointOnLine = false;
     return Manager;
 }());
 

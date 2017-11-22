@@ -4,6 +4,8 @@ export interface ManagerOption {
     canvas: HTMLCanvasElement;
     updateLineCb?: UpdateLineCallback;
     arrowPath?: Path2D & CanvasFillRule;
+    useCubicBezier?: boolean | null;
+    safePointOnLine?: boolean | null;
 }
 export declare class Manager {
     static size: Pos;
@@ -12,11 +14,10 @@ export declare class Manager {
     static canvas: HTMLCanvasElement;
     static updateLineCb: UpdateLineCallback;
     static arrowPath: Path2D & CanvasFillRule;
+    static useCubicBezier: boolean;
+    static safePointOnLine: boolean;
     static init(option: ManagerOption): void;
     static add(node: CanvasNode): void;
-    static bindSize(size: Pos): void;
-    static bindCtx(ctx: CanvasRenderingContext2D): void;
-    static bindCanvas(canvas: HTMLCanvasElement): void;
     static draw(): void;
     static moveTo(target: CanvasNode, pos: Pos): void;
     static deleteNode(target: CanvasNode): void;
