@@ -1,4 +1,4 @@
-import { inheritTag, isSameFn } from './tagFn'
+import { isSameFn } from './tagFn'
 export type El = Element | Document
 
 interface EventItem {
