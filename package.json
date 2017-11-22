@@ -14,7 +14,6 @@
   "license": "MIT",
   "devDependencies": {
     "@types/point-in-polygon": "^1.0.0",
-    "point-in-polygon": "^1.0.1",
     "rollup": "^0.51.5",
     "rollup-plugin-commonjs": "^8.2.5",
     "rollup-plugin-node-resolve": "^3.0.0",
@@ -26,6 +25,7 @@
     "build": "tsc -d && rollup -c"
   },
   "dependencies": {
-    "y-event": "^0.2.0"
+    "y-event": "^0.2.0",
+    "point-in-polygon": "^1.0.1"
   }
 }
