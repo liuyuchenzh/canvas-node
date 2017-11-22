@@ -5,6 +5,7 @@ import { Manager } from '../manager'
 import { findFromRight } from './findFromRight'
 import { isPointOnBezierCurve } from './cubicCurve'
 import { isPointOnCurve } from './quadraticCurve'
+import { isPointOnCurveOld } from './oldFashionedPointOnCurve'
 
 export type Poly = [number, number][]
 export const MARGIN_ERROR = 4
@@ -76,12 +77,7 @@ export function getClickedNode(pos: Pos): CanvasNode {
     if (!node.display) return false
     if (node instanceof ArrowNode) {
       if (Manager.useCubicBezier) {
-        const isValidLine: boolean =
-          node.from &&
-          node.to &&
-          node.from instanceof CanvasNode &&
-          node.to instanceof CanvasNode
-        return !isValidLine || isPointOnBezierCurve(node.pos, node.endPos, pos)
+        return isPointOnBezierCurve(node.pos, node.endPos, pos)
       } else {
         return isPointOnCurve(node.stops, pos)
       }
@@ -147,4 +143,89 @@ function formLineRect(line: ArrowNode): number[] {
  */
 function preExamForLine(line: ArrowNode, pos: Pos): boolean {
   return isPointInPolygon(formLineRect(line), pos)
+}
+
+function avg(x: number, y: number, fix: number = 2): number {
+  return +((x + y) / 2).toFixed(fix)
+}
+
+const DIFF_MARGIN: number = 2
+
+/**
+ * the reason that binary search can be applied here is that
+ * the line path is generally "linear" but with some curves (achieved by manipulating with the control points)
+ * which means there will be a direction to search for next if we get the relationship between
+ * calculated point and real point
+ * PLEASE NOTICE: this is risky! If the line stop to be "linear", which means, for example,
+ * for the same x, we could find two corresponding y on the line, vice versa, then binary search will stop working
+ */
+export function binarySearch(
+  point: Pos,
+  start: number,
+  end: number,
+  count: number,
+  curFn: (...args: number[]) => number,
+  fnArgs: {
+    x: number[]
+    y: number[]
+  },
+  limit: number = 100
+): boolean {
+  if (count > limit) return false
+  const pointsNum: number = fnArgs.x.length
+  const goRight: boolean = fnArgs.x[pointsNum - 1] > fnArgs.x[0]
+  const mid: number = avg(start, end, 4)
+  const xPointOnCurve: number = curFn(...fnArgs.x, mid)
+  const diff = point.x - xPointOnCurve
+  const absDiff: number = Math.abs(diff)
+  let newBoundary: [number, number]
+  const firstHalf: [number, number] = [start, mid]
+  const secondHalf: [number, number] = [mid, end]
+  if (absDiff < DIFF_MARGIN) {
+    const yPointOnCurve: number = curFn(...fnArgs.y, mid)
+    const diffY: number = point.y - yPointOnCurve
+    const absDiffY: number = Math.abs(diffY)
+    if (absDiffY < DIFF_MARGIN) {
+      return true
+    } else {
+      const goUp: boolean = fnArgs.y[pointsNum - 1] < fnArgs.y[0]
+      newBoundary =
+        diffY > 0
+          ? goUp ? firstHalf : secondHalf
+          : goUp ? secondHalf : firstHalf
+    }
+  } else {
+    newBoundary =
+      diff > 0
+        ? goRight ? secondHalf : firstHalf
+        : goRight ? firstHalf : secondHalf
+  }
+  return binarySearch(
+    point,
+    newBoundary[0],
+    newBoundary[1],
+    count + 1,
+    curFn,
+    fnArgs,
+    limit
+  )
+}
+
+export function isPointOnLine(
+  point: Pos,
+  start: number,
+  end: number,
+  count: number,
+  curFn: (...args: number[]) => number,
+  fnArgs: {
+    x: number[]
+    y: number[]
+  },
+  limit: number = 100
+) {
+  if (Manager.safePointOnLine) {
+    return isPointOnCurveOld(point, fnArgs)
+  } else {
+    return binarySearch(point, start, end, count, curFn, fnArgs, limit)
+  }
 }

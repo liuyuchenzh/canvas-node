@@ -1,6 +1,5 @@
 import { Pos } from '../node'
-import { distanceBetween2Points, MARGIN_ERROR } from './isClicked'
-import { getLimitedExamTimes } from './quadraticCurve'
+import { isPointOnLine } from './isClicked'
 
 export function simulateBezierCurve(
   p1: number,
@@ -59,23 +58,33 @@ export function isPointOnBezierCurve(
   end: Pos,
   point: Pos
 ): boolean {
-  const { x, y } = point
   const { x: startX, y: startY } = start
   const { x: endX, y: endY } = end
   const controlPoints: [Pos, Pos] = getControlPoints(start, end)
   const { x: c1x, y: c1y } = controlPoints[0]
   const { x: c2x, y: c2y } = controlPoints[1]
-  const numOfTest: number = Math.floor(
-    distanceBetween2Points(startX, startY, endX, endY) / 2
+  return isPointOnLine(
+    point,
+    0,
+    1,
+    0,
+    simulateBezierCurve,
+    {
+      x: [startX, c1x, c2x, endX],
+      y: [startY, c1y, c2y, endY]
+    }
   )
-  const $numOfTest: number = getLimitedExamTimes(numOfTest)
-  const inc: number = 1 / $numOfTest
-  let t: number = inc
-  while (t < 1) {
-    const lineX: number = simulateBezierCurve(startX, c1x, c2x, endX, t)
-    const lineY: number = simulateBezierCurve(startY, c1y, c2y, endY, t)
-    if (distanceBetween2Points(x, y, lineX, lineY) < MARGIN_ERROR) return true
-    t += inc
-  }
-  return false
+  // const numOfTest: number = Math.floor(
+  //   distanceBetween2Points(startX, startY, endX, endY) / 2
+  // )
+  // const $numOfTest: number = getLimitedExamTimes(numOfTest)
+  // const inc: number = 1 / $numOfTest
+  // let t: number = inc
+  // while (t < 1) {
+  //   const lineX: number = simulateBezierCurve(startX, c1x, c2x, endX, t)
+  //   const lineY: number = simulateBezierCurve(startY, c1y, c2y, endY, t)
+  //   if (distanceBetween2Points(x, y, lineX, lineY) < MARGIN_ERROR) return true
+  //   t += inc
+  // }
+  // return false
 }

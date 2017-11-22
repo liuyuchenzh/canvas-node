@@ -6,6 +6,7 @@ export interface ManagerOption {
   updateLineCb?: UpdateLineCallback
   arrowPath?: Path2D & CanvasFillRule
   useCubicBezier?: boolean | null
+  safePointOnLine?: boolean | null
 }
 
 export class Manager {
@@ -19,36 +20,32 @@ export class Manager {
   static updateLineCb: UpdateLineCallback
   static arrowPath: Path2D & CanvasFillRule
   static useCubicBezier: boolean = false
+  static safePointOnLine: boolean = false
 
   static init(option: ManagerOption) {
-    const { canvas, updateLineCb, arrowPath, useCubicBezier } = option
+    const {
+      canvas,
+      updateLineCb,
+      arrowPath,
+      useCubicBezier,
+      safePointOnLine
+    } = option
     const size: Pos = {
       x: canvas.width,
       y: canvas.height
     }
     const ctx = canvas.getContext('2d')
-    this.bindSize(size)
-    this.bindCtx(ctx)
-    this.bindCanvas(canvas)
+    this.size = size
+    this.ctx = ctx
+    this.canvas = canvas
     this.updateLineCb = updateLineCb
     this.arrowPath = arrowPath
     this.useCubicBezier = !!useCubicBezier
+    this.safePointOnLine = !!safePointOnLine
   }
 
   static add(node: CanvasNode) {
     this.list.push(node)
-  }
-
-  static bindSize(size: Pos) {
-    this.size = size
-  }
-
-  static bindCtx(ctx: CanvasRenderingContext2D) {
-    this.ctx = ctx
-  }
-
-  static bindCanvas(canvas: HTMLCanvasElement) {
-    this.canvas = canvas
   }
 
   // draw every thing

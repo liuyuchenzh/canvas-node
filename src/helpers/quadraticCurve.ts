@@ -1,4 +1,4 @@
-import { distanceBetween2Points, Poly, MARGIN_ERROR } from './isClicked'
+import { Poly, isPointOnLine } from './isClicked'
 import { Pos } from '../node'
 
 /**
@@ -50,22 +50,19 @@ export function isPointOnCurve(poly: Poly, pos: Pos): boolean {
     console.error('only support Quadratic Bézier curves for now')
     return false
   }
-  const { x, y } = pos
   const [start, control, end] = poly
   const [startX, startY] = start
   const [controlX, controlY] = control
   const [endX, endY] = end
-  // subjective number
-  const numOfTest: number =
-    Math.floor(distanceBetween2Points(startX, startY, endX, endY)) / 2
-  const $numOfTest: number = getLimitedExamTimes(numOfTest)
-  const inc: number = 1 / $numOfTest
-  let t: number = inc
-  while (t < 1) {
-    const lineX: number = simulateCurve(startX, controlX, endX, t)
-    const lineY: number = simulateCurve(startY, controlY, endY, t)
-    if (distanceBetween2Points(x, y, lineX, lineY) < MARGIN_ERROR) return true
-    t += inc
-  }
-  return false
+  return isPointOnLine(
+    pos,
+    0,
+    1,
+    0,
+    simulateCurve,
+    {
+      x: [startX, controlX, endX],
+      y: [startY, controlY, endY]
+    }
+  )
 }
