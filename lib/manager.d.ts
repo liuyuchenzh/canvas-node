@@ -24,4 +24,5 @@ export declare class Manager {
     static moveTo(target: CanvasNode, pos: Pos): void;
     static deleteNode(target: CanvasNode): void;
     static deleteConnectedBox(line: ArrowNode): void;
+    static clear(): void;
 }

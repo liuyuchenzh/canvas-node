@@ -16,6 +16,7 @@ declare class Entry {
     static readonly all: CanvasNode[];
     static readonly lines: ArrowNode[];
     static readonly menus: Menu[];
+    static clear(): void;
     static nativeAddEvent: typeof addEvent;
     static nativeRemoveEvent: typeof removeEvent;
     static getClickedNode: typeof getClickedNode;

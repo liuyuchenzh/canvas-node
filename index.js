@@ -1214,6 +1214,12 @@ var Manager = (function () {
             node.lines = node.lines.filter(function (oldLine) { return oldLine !== line; });
         });
     };
+    Manager.clear = function () {
+        this.list.forEach(function (node) {
+            node.destroy();
+        });
+        this.list = [];
+    };
     Manager.list = [];
     return Manager;
 }());
@@ -1296,6 +1302,9 @@ var Entry = (function () {
         enumerable: true,
         configurable: true
     });
+    Entry.clear = function () {
+        Manager.clear();
+    };
     Entry.nativeAddEvent = addEvent;
     Entry.nativeRemoveEvent = removeEvent;
     Entry.getClickedNode = getClickedNode;
