@@ -147,37 +147,23 @@ export function drawLine(
 ) {
   const { style, strokeStyle } = colorObj
   const { x: startX, y: startY } = start
-
   const { x: endX, y: endY } = end
-
-  const $endX: number = normalizeEndPoint(startX, endX)
-  const $endY: number = normalizeEndPoint(startY, endY)
 
   ctx.beginPath()
   ctx.moveTo(startX, startY)
-  const stop = calculateStop(startX, startY, $endX, $endY)
+  const stop = calculateStop(startX, startY, endX, endY)
   // draw curve
-  ctx.quadraticCurveTo(stop[0], stop[1], $endX, $endY)
+  ctx.quadraticCurveTo(stop[0], stop[1], endX, endY)
   // get where to put arrow
-  const arrowX: number = simulateCurve(startX, stop[0], $endX, fixRatio(ratio))
-  const arrowY: number = simulateCurve(startY, stop[1], $endY, fixRatio(ratio))
+  const arrowX: number = simulateCurve(startX, stop[0], endX, fixRatio(ratio))
+  const arrowY: number = simulateCurve(startY, stop[1], endY, fixRatio(ratio))
   // calculate tan
-  const arrowDirX: number = getDirective(
-    startX,
-    stop[0],
-    $endX,
-    fixRatio(ratio)
-  )
-  const arrowDirY: number = getDirective(
-    startY,
-    stop[1],
-    $endY,
-    fixRatio(ratio)
-  )
+  const arrowDirX: number = getDirective(startX, stop[0], endX, fixRatio(ratio))
+  const arrowDirY: number = getDirective(startY, stop[1], endY, fixRatio(ratio))
   const tan: number = arrowDirY / arrowDirX
   // get rotate angle
   const angle: number = Math.atan(tan)
-  const goLeft: boolean = $endX < startX
+  const goLeft: boolean = endX < startX
   const rotateAngle: number = goLeft ? angle - Math.PI : angle
   ctx.lineWidth = 2
   ctx.strokeStyle = strokeStyle
@@ -269,31 +255,27 @@ export function drawCubicBezier(
 ) {
   const { style, strokeStyle } = colorObj
   const { x: startX, y: startY } = start
-
   const { x: endX, y: endY } = end
-
-  const $endX: number = normalizeEndPoint(startX, endX)
-  const $endY: number = normalizeEndPoint(startY, endY)
 
   ctx.beginPath()
   ctx.moveTo(startX, startY)
   const controlPoints: [Pos, Pos] = getControlPoints(start, end)
   const { x: c1x, y: c1y } = controlPoints[0]
   const { x: c2x, y: c2y } = controlPoints[1]
-  ctx.bezierCurveTo(c1x, c1y, c2x, c2y, $endX, $endY)
+  ctx.bezierCurveTo(c1x, c1y, c2x, c2y, endX, endY)
   // get where to put arrow
   const arrowX: number = simulateBezierCurve(
     startX,
     c1x,
     c2x,
-    $endX,
+    endX,
     fixRatio(ratio)
   )
   const arrowY: number = simulateBezierCurve(
     startY,
     c1y,
     c2y,
-    $endY,
+    endY,
     fixRatio(ratio)
   )
   // calculate tan
@@ -301,14 +283,14 @@ export function drawCubicBezier(
     startX,
     c1x,
     c2x,
-    $endX,
+    endX,
     fixRatio(ratio)
   )
   const arrowDirY: number = getDirForBezierCurve(
     startY,
     c1y,
     c2y,
-    $endY,
+    endY,
     fixRatio(ratio)
   )
   const tan: number = arrowDirY / arrowDirX
