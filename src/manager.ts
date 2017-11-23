@@ -1,5 +1,7 @@
 import { CanvasNode, Pos, UpdateLineCallback } from './node'
 import { ArrowNode } from './arrow'
+import { ARROW_H } from './helpers/drawArrow'
+import { isBoolean, isNum } from './helpers/isType'
 
 export interface ManagerOption {
   canvas: HTMLCanvasElement
@@ -7,6 +9,7 @@ export interface ManagerOption {
   arrowPath?: Path2D & CanvasFillRule
   useCubicBezier?: boolean | null
   safePointOnLine?: boolean | null
+  arrowH?: number | null
 }
 
 export class Manager {
@@ -19,8 +22,9 @@ export class Manager {
   static canvas: HTMLCanvasElement
   static updateLineCb: UpdateLineCallback
   static arrowPath: Path2D & CanvasFillRule
-  static useCubicBezier: boolean = false
-  static safePointOnLine: boolean = false
+  static useCubicBezier: boolean
+  static safePointOnLine: boolean
+  static arrowH: number
 
   static init(option: ManagerOption) {
     const {
@@ -28,7 +32,8 @@ export class Manager {
       updateLineCb,
       arrowPath,
       useCubicBezier,
-      safePointOnLine
+      safePointOnLine,
+      arrowH
     } = option
     const size: Pos = {
       x: canvas.width,
@@ -40,8 +45,9 @@ export class Manager {
     this.canvas = canvas
     this.updateLineCb = updateLineCb
     this.arrowPath = arrowPath
-    this.useCubicBezier = !!useCubicBezier
-    this.safePointOnLine = !!safePointOnLine
+    this.useCubicBezier = isBoolean(useCubicBezier) ? useCubicBezier : false
+    this.safePointOnLine = isBoolean(safePointOnLine) ? safePointOnLine : false
+    this.arrowH = isNum(arrowH) ? arrowH : ARROW_H
   }
 
   static add(node: CanvasNode) {

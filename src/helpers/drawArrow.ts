@@ -6,16 +6,19 @@ import {
   getDirForBezierCurve,
   simulateBezierCurve
 } from './cubicCurve'
+import { getAdjustedDir } from './adjustDir'
+import { distanceBetween2Points } from './isClicked'
 
 const MARGIN_ERROR: number = 5
+export const ARROW_H: number = 15
 
 function drawTriangle(): Path2D | CanvasFillRule {
   const triangle = new Path2D()
 
-  triangle.moveTo(-15, 0)
-  triangle.lineTo(-15, 5)
+  triangle.moveTo(-ARROW_H, 0)
+  triangle.lineTo(-ARROW_H, 5)
   triangle.lineTo(0, 0)
-  triangle.lineTo(-15, -5)
+  triangle.lineTo(-ARROW_H, -5)
   triangle.closePath()
   return triangle
 }
@@ -27,17 +30,6 @@ function drawTriangle(): Path2D | CanvasFillRule {
  */
 function withInMargin(diff: number) {
   return Math.abs(diff) < MARGIN_ERROR
-}
-
-/**
- * normalize end point
- * @param startPoint
- * @param endPoint
- * @returns {number}
- */
-function normalizeEndPoint(startPoint: number, endPoint: number) {
-  const diff: number = startPoint - endPoint
-  return withInMargin(diff) ? startPoint : endPoint
 }
 
 /**
@@ -158,8 +150,23 @@ export function drawLine(
   const arrowX: number = simulateCurve(startX, stop[0], endX, fixRatio(ratio))
   const arrowY: number = simulateCurve(startY, stop[1], endY, fixRatio(ratio))
   // calculate tan
-  const arrowDirX: number = getDirective(startX, stop[0], endX, fixRatio(ratio))
-  const arrowDirY: number = getDirective(startY, stop[1], endY, fixRatio(ratio))
+  const distance: number = distanceBetween2Points(startX, startY, endX, endY)
+  const arrowDirX: number = getAdjustedDir(
+    getDirective,
+    distance,
+    startX,
+    stop[0],
+    endX,
+    fixRatio(ratio)
+  )
+  const arrowDirY: number = getAdjustedDir(
+    getDirective,
+    distance,
+    startY,
+    stop[1],
+    endY,
+    fixRatio(ratio)
+  )
   const tan: number = arrowDirY / arrowDirX
   // get rotate angle
   const angle: number = Math.atan(tan)
@@ -263,6 +270,8 @@ export function drawCubicBezier(
   const { x: c1x, y: c1y } = controlPoints[0]
   const { x: c2x, y: c2y } = controlPoints[1]
   ctx.bezierCurveTo(c1x, c1y, c2x, c2y, endX, endY)
+
+  const distance: number = distanceBetween2Points(startX, startY, endX, endY)
   // get where to put arrow
   const arrowX: number = simulateBezierCurve(
     startX,
@@ -279,14 +288,18 @@ export function drawCubicBezier(
     fixRatio(ratio)
   )
   // calculate tan
-  const arrowDirX: number = getDirForBezierCurve(
+  const arrowDirX: number = getAdjustedDir(
+    getDirForBezierCurve,
+    distance,
     startX,
     c1x,
     c2x,
     endX,
     fixRatio(ratio)
   )
-  const arrowDirY: number = getDirForBezierCurve(
+  const arrowDirY: number = getAdjustedDir(
+    getDirForBezierCurve,
+    distance,
     startY,
     c1y,
     c2y,

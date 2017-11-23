@@ -14,6 +14,7 @@
   - [updateLineCb] `<function(box, line, isFrom)>`: define how to place the connecting line between two boxes.
   Details could be found [here](./updateLineCb.md).
   - [arrowPath] `<Path2D>`: path for arrow on line. Details could be found [here](./arrowPath.md)
+  - [arrowH] `<number>`: when use custom `arrowPath` above, should provide with this as well. Stands for the height of the arrow shape.
   - [useCubicBezier] `<boolean>`: default to false and use quadratic Bezier curves.
   - [safePointOnLine] `<boolean>`: use old-fashioned point-to-point process to detect whether a point is on a specific line.
   Default to `false`, and use binary search.
