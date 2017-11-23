@@ -6,6 +6,7 @@ export interface ManagerOption {
     arrowPath?: Path2D & CanvasFillRule;
     useCubicBezier?: boolean | null;
     safePointOnLine?: boolean | null;
+    arrowH?: number | null;
 }
 export declare class Manager {
     static size: Pos;
@@ -16,6 +17,7 @@ export declare class Manager {
     static arrowPath: Path2D & CanvasFillRule;
     static useCubicBezier: boolean;
     static safePointOnLine: boolean;
+    static arrowH: number;
     static init(option: ManagerOption): void;
     static add(node: CanvasNode): void;
     static draw(): void;

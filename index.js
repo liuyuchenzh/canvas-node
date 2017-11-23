@@ -276,22 +276,39 @@ function isPointOnCurve(poly, pos) {
     });
 }
 
+function getAdjustedDir(fn, distance) {
+    var args = [];
+    for (var _i = 2; _i < arguments.length; _i++) {
+        args[_i - 2] = arguments[_i];
+    }
+    var argLen = args.length;
+    var ratio = args[argLen - 1];
+    if (ratio <= 0.6) {
+        return fn.apply(void 0, args);
+    }
+    var newArgs = args.slice();
+    newArgs.pop();
+    var realDir = fn.apply(void 0, args);
+    var pct = 2 * Manager.arrowH / distance;
+    var balanceRatio = Math.max(Math.max(ratio - pct, 0), 0.5);
+    newArgs.push(balanceRatio);
+    var backDir = fn.apply(void 0, newArgs);
+    return realDir * 0.5 + backDir * 0.5;
+}
+
 var MARGIN_ERROR = 5;
+var ARROW_H = 15;
 function drawTriangle() {
     var triangle = new Path2D();
-    triangle.moveTo(-15, 0);
-    triangle.lineTo(-15, 5);
+    triangle.moveTo(-ARROW_H, 0);
+    triangle.lineTo(-ARROW_H, 5);
     triangle.lineTo(0, 0);
-    triangle.lineTo(-15, -5);
+    triangle.lineTo(-ARROW_H, -5);
     triangle.closePath();
     return triangle;
 }
 function withInMargin(diff) {
     return Math.abs(diff) < MARGIN_ERROR;
-}
-function normalizeEndPoint(startPoint, endPoint) {
-    var diff = startPoint - endPoint;
-    return withInMargin(diff) ? startPoint : endPoint;
 }
 function getDirection(start, end) {
     var startX = start.x, startY = start.y;
@@ -351,19 +368,18 @@ function drawLine(ctx, start, end, ratio, arrowPath, colorObj) {
     var style = colorObj.style, strokeStyle = colorObj.strokeStyle;
     var startX = start.x, startY = start.y;
     var endX = end.x, endY = end.y;
-    var $endX = normalizeEndPoint(startX, endX);
-    var $endY = normalizeEndPoint(startY, endY);
     ctx.beginPath();
     ctx.moveTo(startX, startY);
-    var stop = calculateStop(startX, startY, $endX, $endY);
-    ctx.quadraticCurveTo(stop[0], stop[1], $endX, $endY);
-    var arrowX = simulateCurve(startX, stop[0], $endX, fixRatio(ratio));
-    var arrowY = simulateCurve(startY, stop[1], $endY, fixRatio(ratio));
-    var arrowDirX = getDirective(startX, stop[0], $endX, fixRatio(ratio));
-    var arrowDirY = getDirective(startY, stop[1], $endY, fixRatio(ratio));
+    var stop = calculateStop(startX, startY, endX, endY);
+    ctx.quadraticCurveTo(stop[0], stop[1], endX, endY);
+    var arrowX = simulateCurve(startX, stop[0], endX, fixRatio(ratio));
+    var arrowY = simulateCurve(startY, stop[1], endY, fixRatio(ratio));
+    var distance = distanceBetween2Points(startX, startY, endX, endY);
+    var arrowDirX = getAdjustedDir(getDirective, distance, startX, stop[0], endX, fixRatio(ratio));
+    var arrowDirY = getAdjustedDir(getDirective, distance, startY, stop[1], endY, fixRatio(ratio));
     var tan = arrowDirY / arrowDirX;
     var angle = Math.atan(tan);
-    var goLeft = $endX < startX;
+    var goLeft = endX < startX;
     var rotateAngle = goLeft ? angle - Math.PI : angle;
     ctx.lineWidth = 2;
     ctx.strokeStyle = strokeStyle;
@@ -421,18 +437,17 @@ function drawCubicBezier(ctx, start, end, ratio, arrowPath, colorObj) {
     var style = colorObj.style, strokeStyle = colorObj.strokeStyle;
     var startX = start.x, startY = start.y;
     var endX = end.x, endY = end.y;
-    var $endX = normalizeEndPoint(startX, endX);
-    var $endY = normalizeEndPoint(startY, endY);
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     var controlPoints = getControlPoints(start, end);
     var _a = controlPoints[0], c1x = _a.x, c1y = _a.y;
     var _b = controlPoints[1], c2x = _b.x, c2y = _b.y;
-    ctx.bezierCurveTo(c1x, c1y, c2x, c2y, $endX, $endY);
-    var arrowX = simulateBezierCurve(startX, c1x, c2x, $endX, fixRatio(ratio));
-    var arrowY = simulateBezierCurve(startY, c1y, c2y, $endY, fixRatio(ratio));
-    var arrowDirX = getDirForBezierCurve(startX, c1x, c2x, $endX, fixRatio(ratio));
-    var arrowDirY = getDirForBezierCurve(startY, c1y, c2y, $endY, fixRatio(ratio));
+    ctx.bezierCurveTo(c1x, c1y, c2x, c2y, endX, endY);
+    var distance = distanceBetween2Points(startX, startY, endX, endY);
+    var arrowX = simulateBezierCurve(startX, c1x, c2x, endX, fixRatio(ratio));
+    var arrowY = simulateBezierCurve(startY, c1y, c2y, endY, fixRatio(ratio));
+    var arrowDirX = getAdjustedDir(getDirForBezierCurve, distance, startX, c1x, c2x, endX, fixRatio(ratio));
+    var arrowDirY = getAdjustedDir(getDirForBezierCurve, distance, startY, c1y, c2y, endY, fixRatio(ratio));
     var tan = arrowDirY / arrowDirX;
     var angle = Math.atan(tan);
     var goLeft = endX < startX;
@@ -1101,11 +1116,18 @@ var ArrowNode = (function (_super) {
     return ArrowNode;
 }(CanvasNode));
 
+function isBoolean(input) {
+    return typeof input === 'boolean';
+}
+function isNum(input) {
+    return typeof input === 'number' && !isNaN(input);
+}
+
 var Manager = (function () {
     function Manager() {
     }
     Manager.init = function (option) {
-        var canvas = option.canvas, updateLineCb = option.updateLineCb, arrowPath = option.arrowPath, useCubicBezier = option.useCubicBezier, safePointOnLine = option.safePointOnLine;
+        var canvas = option.canvas, updateLineCb = option.updateLineCb, arrowPath = option.arrowPath, useCubicBezier = option.useCubicBezier, safePointOnLine = option.safePointOnLine, arrowH = option.arrowH;
         var size = {
             x: canvas.width,
             y: canvas.height
@@ -1116,8 +1138,9 @@ var Manager = (function () {
         this.canvas = canvas;
         this.updateLineCb = updateLineCb;
         this.arrowPath = arrowPath;
-        this.useCubicBezier = !!useCubicBezier;
-        this.safePointOnLine = !!safePointOnLine;
+        this.useCubicBezier = isBoolean(useCubicBezier) ? useCubicBezier : false;
+        this.safePointOnLine = isBoolean(safePointOnLine) ? safePointOnLine : false;
+        this.arrowH = isNum(arrowH) ? arrowH : ARROW_H;
     };
     Manager.add = function (node) {
         this.list.push(node);
@@ -1192,8 +1215,6 @@ var Manager = (function () {
         });
     };
     Manager.list = [];
-    Manager.useCubicBezier = false;
-    Manager.safePointOnLine = false;
     return Manager;
 }());
 
