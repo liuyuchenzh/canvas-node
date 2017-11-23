@@ -54,6 +54,10 @@ class Entry {
     return Manager.list.filter(node => node instanceof Menu)
   }
 
+  static clear() {
+    Manager.clear()
+  }
+
   static nativeAddEvent = addEvent
   static nativeRemoveEvent = removeEvent
   static getClickedNode = getClickedNode

@@ -135,6 +135,10 @@ return `<boolean>`
 `isConnectedSeq` takes sequence into account. In other words, which one of the nodes is
 the starting one matters.
 
+## CanvasNode.clear()
+
+Destroy all instances
+
 ## CanvasNode.ArrowNode
 
 return the class of [`ArrowNode`](./line.md).

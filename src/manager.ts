@@ -144,4 +144,11 @@ export class Manager {
       node.lines = node.lines.filter(oldLine => oldLine !== line)
     })
   }
+
+  static clear() {
+    this.list.forEach(node => {
+      node.destroy()
+    })
+    this.list = []
+  }
 }
