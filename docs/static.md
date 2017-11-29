@@ -37,6 +37,7 @@ CanvasNode.init({
   - [data] `<any>`: any thing to bind with the box.
   - [style] `<string>`: fill style of the box.
   - [strokeStyle] `<string>`: stroke style of the box.
+  - [lineWidth] `<number>`: width of stoke line.
   - [font] `<string>`: font style of the text.
   - [beforeDrawCbs] `<function[]>`: custom callback for extra drawing. Execute before all default drawing process.
   - [drawCbs] `<function[]>`: custom callback for extra drawing. Execute after all default drawing process.

@@ -42,6 +42,7 @@ export interface CanvasNodeOption {
   color?: string
   font?: string
   text?: string
+  lineWidth?: number
   drawCbs?: Callback[]
   beforeDrawCbs?: Callback[]
   rawVertexes?: RawVertexes
@@ -56,7 +57,8 @@ function defaultData() {
     color: '#000',
     data: {},
     display: true,
-    exist: true
+    exist: true,
+    lineWidth: 2
   }
 }
 
@@ -70,6 +72,7 @@ export class CanvasNode implements CanvasNodeOption {
   size: Pos
   style: string
   strokeStyle: string
+  lineWidth: number
   color: string
   text: string
   display: boolean
@@ -80,7 +83,7 @@ export class CanvasNode implements CanvasNodeOption {
   lines: ArrowNode[] = []
   updateLineCb: UpdateLineCallback
 
-  // properties to be proxied
+  // properties to proxied
   private autoUpdateFields: string[] = [
     'font',
     'size',
@@ -91,7 +94,8 @@ export class CanvasNode implements CanvasNodeOption {
     'pos',
     'endPos',
     'display',
-    'exist'
+    'exist',
+    'lineWidth'
   ]
 
   private hoverInCb: NodeEventCallback[] = []
@@ -167,6 +171,8 @@ export class CanvasNode implements CanvasNodeOption {
   $draw() {
     // to enable show/hide functionality
     if (!this.display) return
+    // set lineWidth globally
+    this.ctx.lineWidth = this.lineWidth
     // custom callback
     this.invokeDrawCbAbs('beforeDrawCbs')
     // start default draw
