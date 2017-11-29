@@ -24,6 +24,7 @@ export interface CanvasNodeOption {
     color?: string;
     font?: string;
     text?: string;
+    lineWidth?: number;
     drawCbs?: Callback[];
     beforeDrawCbs?: Callback[];
     rawVertexes?: RawVertexes;
@@ -39,6 +40,7 @@ export declare class CanvasNode implements CanvasNodeOption {
     size: Pos;
     style: string;
     strokeStyle: string;
+    lineWidth: number;
     color: string;
     text: string;
     display: boolean;

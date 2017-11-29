@@ -827,7 +827,8 @@ function defaultData() {
         color: '#000',
         data: {},
         display: true,
-        exist: true
+        exist: true,
+        lineWidth: 2
     };
 }
 var CanvasNode = (function () {
@@ -845,7 +846,8 @@ var CanvasNode = (function () {
             'pos',
             'endPos',
             'display',
-            'exist'
+            'exist',
+            'lineWidth'
         ];
         this.hoverInCb = [];
         this.hoverOutCb = [];
@@ -907,6 +909,7 @@ var CanvasNode = (function () {
     CanvasNode.prototype.$draw = function () {
         if (!this.display)
             return;
+        this.ctx.lineWidth = this.lineWidth;
         this.invokeDrawCbAbs('beforeDrawCbs');
         this.ctx.save();
         this.ctx.translate(this.pos.x, this.pos.y);
