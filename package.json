@@ -26,6 +26,6 @@
   },
   "dependencies": {
     "point-in-polygon": "^1.0.1",
-    "y-event": "^0.2.0"
+    "y-event": "^0.2.2"
   }
 }
