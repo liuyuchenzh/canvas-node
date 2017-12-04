@@ -162,7 +162,6 @@ export class CanvasNode implements CanvasNodeOption {
 
   $moveTo(pos: Pos) {
     this.updatePos(pos)
-    // this.$draw()
     // so the line will be redrew with new from and to positions
     // tricky point is, every line is drew after node, so it will be updated later then its from and to node
     this.updateLinePos()
@@ -191,8 +190,8 @@ export class CanvasNode implements CanvasNodeOption {
     this.invokeDrawCbAbs('drawCbs')
   }
 
-  draw() {
-    Manager.draw()
+  draw(cleanFirst: boolean = true) {
+    Manager.draw(cleanFirst)
   }
 
   updatePos(pos: Pos) {

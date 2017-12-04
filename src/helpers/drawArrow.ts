@@ -199,7 +199,7 @@ export function centralizePoint(node: CanvasNode): Pos {
 }
 
 /**
- * place point on the edge of polygon
+ * place point on the limit of polygon
  * @param {Pos} start
  * @param {Pos} end
  * @param {CanvasNode} node
@@ -219,7 +219,7 @@ export function placePointOnEdge(
 }
 
 /**
- * given direction and targeted node, get the coordinate of point on edge
+ * given direction and targeted node, get the coordinate of point on limit
  * @param {string} dir: for the perspective of the end, which direction it is on for the start
  * @param {CanvasNode} node
  * @returns {Pos}

@@ -54,12 +54,15 @@ export class Manager {
     this.list.push(node)
   }
 
-  // draw every thing
-  static draw() {
+  static clean() {
     this.ctx.clearRect(0, 0, this.size.x, this.size.y)
+  }
+
+  // draw every thing
+  static draw(cleanFirst: boolean = true) {
+    cleanFirst && this.clean()
     this.ctx.save()
     this.list.forEach(node => node.$draw())
-
     this.ctx.restore()
   }
 

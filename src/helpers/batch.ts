@@ -7,32 +7,26 @@ const KEY_NAME: symbol = Symbol(PRIVATE_KEY)
 export class Batch {
   static timer: number = 0
   static list: BatchCallback[] = []
+  static limit: number = 10
 
   /**
    * add callback to list
-   * @param {BatchCallback} fn 
-   * @param {any=} uniqueKey: used to track callback. For callbacks share the same key, only the last fn will be fired (throttle)
+   * @param {BatchCallback} fn
+   * @param {*=} uniqueKey: used to track callback. For callbacks share the same key, only the last fn will be fired (throttle)
    * @returns {void}
    */
   static add(fn: BatchCallback, uniqueKey?: any) {
     if (!isUndef(uniqueKey) && !isNull(uniqueKey)) {
       fn[KEY_NAME] = uniqueKey
-      const existed: boolean = this.includes(uniqueKey)
-      if (existed) {
-        this.unify(uniqueKey, fn)
-      } else {
-        this.list.push(fn)
-      }
-    } else {
-      this.list.push(fn)
     }
+    this.unify(uniqueKey, fn)
     this.batch()
   }
 
   /**
    * find whether the type of callback (with the same uniqueKey) existed
-   * @param {any} key
-   * @return {boolean} 
+   * @param {*} key
+   * @return {boolean}
    */
   static includes(key: any): boolean {
     return this.list.some(cb => {
@@ -42,33 +36,40 @@ export class Batch {
 
   /**
    * make sure only one callback with the sepecific uniqueKey existed
-   * @param {any} key : unique key for the callback
-   * @param {BatchCallback} fn 
+   * @param {*} key : unique key for the callback
+   * @param {BatchCallback} fn
    */
   static unify(key: any, fn: BatchCallback) {
-    this.list.map(cb => {
-      if (cb[KEY_NAME] === key) {
-        return fn
-      }
-      return cb
-    })
+    if (!key || !this.includes(key)) {
+      this.list.push(fn)
+    } else {
+      this.list = this.list.map(cb => {
+        if (cb[KEY_NAME] === key) {
+          return fn
+        }
+        return cb
+      })
+    }
   }
 
   static batch() {
-    cancelAnimationFrame(this.timer)
-    this.timer = requestAnimationFrame(() => {
+    if (this.list.length > this.limit) {
       this.invoke()
-    })
+    } else {
+      cancelAnimationFrame(this.timer)
+      this.timer = requestAnimationFrame(() => {
+        this.invoke()
+      })
+    }
   }
 
   static invoke() {
-    const len: number = this.list.length
-    let i: number = 0
-    while (i < len) {
-      const cb: BatchCallback = this.list[i]
-      cb()
-      i++
-    }
+    let len = this.list.length
+    if (!len) return
+    // only pick the last one
+    // since for each render, Canvas.forEach will be called
+    const cb = this.list[Math.min(len - 1, this.limit - 1)]
+    cb()
     this.list = []
   }
 }
