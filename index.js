@@ -771,17 +771,8 @@ var Batch = (function () {
     Batch.add = function (fn, uniqueKey) {
         if (!isUndef(uniqueKey) && !isNull(uniqueKey)) {
             fn[KEY_NAME] = uniqueKey;
-            var existed = this.includes(uniqueKey);
-            if (existed) {
-                this.unify(uniqueKey, fn);
-            }
-            else {
-                this.list.push(fn);
-            }
         }
-        else {
-            this.list.push(fn);
-        }
+        this.unify(uniqueKey, fn);
         this.batch();
     };
     Batch.includes = function (key) {
@@ -790,32 +781,41 @@ var Batch = (function () {
         });
     };
     Batch.unify = function (key, fn) {
-        this.list.map(function (cb) {
-            if (cb[KEY_NAME] === key) {
-                return fn;
-            }
-            return cb;
-        });
+        if (!key || !this.includes(key)) {
+            this.list.push(fn);
+        }
+        else {
+            this.list = this.list.map(function (cb) {
+                if (cb[KEY_NAME] === key) {
+                    return fn;
+                }
+                return cb;
+            });
+        }
     };
     Batch.batch = function () {
         var _this = this;
-        cancelAnimationFrame(this.timer);
-        this.timer = requestAnimationFrame(function () {
-            _this.invoke();
-        });
+        if (this.list.length > this.limit) {
+            this.invoke();
+        }
+        else {
+            cancelAnimationFrame(this.timer);
+            this.timer = requestAnimationFrame(function () {
+                _this.invoke();
+            });
+        }
     };
     Batch.invoke = function () {
         var len = this.list.length;
-        var i = 0;
-        while (i < len) {
-            var cb = this.list[i];
-            cb();
-            i++;
-        }
+        if (!len)
+            return;
+        var cb = this.list[Math.min(len - 1, this.limit - 1)];
+        cb();
         this.list = [];
     };
     Batch.timer = 0;
     Batch.list = [];
+    Batch.limit = 10;
     return Batch;
 }());
 
@@ -919,8 +919,9 @@ var CanvasNode = (function () {
         this.ctx.restore();
         this.invokeDrawCbAbs('drawCbs');
     };
-    CanvasNode.prototype.draw = function () {
-        Manager.draw();
+    CanvasNode.prototype.draw = function (cleanFirst) {
+        if (cleanFirst === void 0) { cleanFirst = true; }
+        Manager.draw(cleanFirst);
     };
     CanvasNode.prototype.updatePos = function (pos) {
         this.pos = pos;
@@ -1148,8 +1149,12 @@ var Manager = (function () {
     Manager.add = function (node) {
         this.list.push(node);
     };
-    Manager.draw = function () {
+    Manager.clean = function () {
         this.ctx.clearRect(0, 0, this.size.x, this.size.y);
+    };
+    Manager.draw = function (cleanFirst) {
+        if (cleanFirst === void 0) { cleanFirst = true; }
+        cleanFirst && this.clean();
         this.ctx.save();
         this.list.forEach(function (node) { return node.$draw(); });
         this.ctx.restore();

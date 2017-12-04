@@ -20,7 +20,8 @@ export declare class Manager {
     static arrowH: number;
     static init(option: ManagerOption): void;
     static add(node: CanvasNode): void;
-    static draw(): void;
+    static clean(): void;
+    static draw(cleanFirst?: boolean): void;
     static moveTo(target: CanvasNode, pos: Pos): void;
     static deleteNode(target: CanvasNode): void;
     static deleteConnectedBox(line: ArrowNode): void;

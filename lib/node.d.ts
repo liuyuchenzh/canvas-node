@@ -61,7 +61,7 @@ export declare class CanvasNode implements CanvasNodeOption {
     moveTo(pos: Pos): void;
     $moveTo(pos: Pos): void;
     $draw(): void;
-    draw(): void;
+    draw(cleanFirst?: boolean): void;
     updatePos(pos: Pos): void;
     drawBorder(): void;
     fill(): void;
