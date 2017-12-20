@@ -1,7 +1,7 @@
 import { CanvasNode, Pos, UpdateLineCallback } from './node'
 import { ArrowNode } from './arrow'
 import { ARROW_H } from './helpers/drawArrow'
-import { isBoolean, isNum } from './helpers/isType'
+import { isBoolean, isNum } from './helpers/types'
 
 export interface ManagerOption {
   canvas: HTMLCanvasElement
