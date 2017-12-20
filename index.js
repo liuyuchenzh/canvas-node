@@ -762,6 +762,12 @@ function isNull(input) {
 function isFn(input) {
     return typeof input === 'function';
 }
+function isBoolean(input) {
+    return typeof input === 'boolean';
+}
+function isNum(input) {
+    return typeof input === 'number' && !isNaN(input);
+}
 
 var PRIVATE_KEY$1 = 'canvas-node';
 var KEY_NAME = Symbol(PRIVATE_KEY$1);
@@ -1119,13 +1125,6 @@ var ArrowNode = (function (_super) {
     };
     return ArrowNode;
 }(CanvasNode));
-
-function isBoolean(input) {
-    return typeof input === 'boolean';
-}
-function isNum(input) {
-    return typeof input === 'number' && !isNaN(input);
-}
 
 var Manager = (function () {
     function Manager() {
