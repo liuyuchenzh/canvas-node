@@ -4,21 +4,21 @@ ArrowNode inherit all methods from `CanvasNode`, and has some own ones.
 
 ## new ArrowNode(option)
 
-- option `<object>`: almost the same as the one for `CanvasNode`, with two more optional fields:
-  - [ratio] `<number>`: place where the arrow should be on the line
-  - [arrowPath] `<Path2D>`: custom arrow shape. Should be pointing RIGHT.
+* option `<object>`: almost the same as the one for `CanvasNode`, with two more optional fields:
+  * [ratio] `<number>`: place where the arrow should be on the line
+  * [arrowPath] `<Path2D>`: custom arrow shape. Should be pointing RIGHT.
 
 ## connect(from, to)
 
-- from `<CanvasNode>`: from which `CanvasNode`.
-- to `<CanvasNode>`: to which `CanvasNode`.
+* from `<CanvasNode>`: from which `CanvasNode`.
+* to `<CanvasNode>`: to which `CanvasNode`.
 
 ```js
 line.connect(box1, box2)
 ```
 
 > `conncet` only save the referrence of `from` and `to` to the line.\
-Viusally, you need to set proper `pos` and call `moveTo` to actually 'connect' two box.
+> Viusally, you need to set proper `pos` and call `moveTo` to actually 'connect' two box.
 
 ## abort()
 
@@ -30,17 +30,14 @@ line.abort()
 
 ## endPos
 
-- `<{x: number, y: number}>`: like `pos`, this is another property to define where to place the line.
-Updating `endPos` would effectively change the end point of the line.
-While updating `pos` would change the origin of the line.
- 
-
+* `<{x: number, y: number}>`: like `pos`, this is another property to define where to place the line.
+  Updating `endPos` would effectively change the end point of the line.
+  While updating `pos` would change the origin of the line.
 
 ## from
 
-- `<CanvasNode>`: node which the line starts from.
-
+* `<CanvasNode>`: node which the line starts from.
 
 ## to
 
-- `<CanvasNode>`: node which the line ends with.
+* `<CanvasNode>`: node which the line ends with.
