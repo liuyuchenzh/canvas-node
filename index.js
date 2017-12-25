@@ -114,7 +114,7 @@ function isPointOnBezierCurve(start, end, point) {
 
 function isPointOnCurveOld(point, points) {
     var pointsNum = points.x.length;
-    var numOfTest = Math.floor(distanceBetween2Points(points.x[0], points.y[0], points.x[pointsNum - 1], points.y[pointsNum - 1]) / 2);
+    var numOfTest = Math.floor(distanceBetween2Points(points.x[0], points.y[0], points.x[pointsNum - 1], points.y[pointsNum - 1]) / MARGIN_ERROR$1);
     var $numOfTest = getLimitedExamTimes(numOfTest);
     var inc = 1 / $numOfTest;
     var t = inc;
