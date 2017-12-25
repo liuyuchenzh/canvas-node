@@ -20,7 +20,7 @@ export function isPointOnCurveOld(
       points.y[0],
       points.x[pointsNum - 1],
       points.y[pointsNum - 1]
-    ) / 2
+    ) / MARGIN_ERROR
   )
   const $numOfTest: number = getLimitedExamTimes(numOfTest)
   const inc: number = 1 / $numOfTest
