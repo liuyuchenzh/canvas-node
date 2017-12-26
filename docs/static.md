@@ -95,19 +95,19 @@ CanvasNode.addEvent('mouseover', (e, node) => {
 
 ## CanvasNode.getClickedLine(position)
 
-* position `{object}`: clicked position in form of `{x: number, y: number}`.
+* position `<object>`: clicked position in form of `{x: number, y: number}`.
 
 return `ArrowNode`
 
 ## CanvasNode.getClickedNode(position)
 
-* position `{object}`: clicked position in form of `{x: number, y: number}`.
+* position `<object>`: clicked position in form of `{x: number, y: number}`.
 
 return `CanvasNode`
 
 ## CanvasNode.getClickedBox(position)
 
-* position `{object}`: clicked position in form of `{x: number, y: number}`.
+* position `<object>`: clicked position in form of `{x: number, y: number}`.
 
 return `CanvasNode` but exclude `ArrowNode`
 

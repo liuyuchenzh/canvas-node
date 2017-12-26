@@ -43,7 +43,7 @@ Accept an object as argument, fields of which are decribed below:
 ## draw()
 
 Draw the node on canvas.\
-In fact, this would update the whole canvas, in other wrods, redraw everything.
+In fact, this would update the whole canvas, in other words, redraw everything.
 
 > In most cases, you don't need to call `draw` since the `CanvasNode` handle the update for you.\
 > But if you have some unique need to update the view, then you can alway use `draw` manually.
@@ -66,12 +66,12 @@ node.moveTo({ x: 100, y: 100 })
 
 * callback `<function(node)>`: drawing callback. You can draw anything.
 
-  * node `<CanvaseNode>`: node being drew on.
+  * node `<CanvasNode>`: node being drew on.
 
 ## addBeforeDrawCb(callback)
 
 * callback `<function(node)>`: drawing callback. You can draw anything.
-  * node `<CanvaseNode>`: node being drew on.
+  * node `<CanvasNode>`: node being drew on.
 
 ## remove([node])
 
