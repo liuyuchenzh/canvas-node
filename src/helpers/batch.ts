@@ -53,10 +53,10 @@ export class Batch {
   }
 
   static batch() {
+    cancelAnimationFrame(this.timer)
     if (this.list.length > this.limit) {
       this.invoke()
     } else {
-      cancelAnimationFrame(this.timer)
       this.timer = requestAnimationFrame(() => {
         this.invoke()
       })
