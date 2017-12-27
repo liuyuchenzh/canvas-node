@@ -35,7 +35,7 @@ export class Batch {
   }
 
   /**
-   * make sure only one callback with the sepecific uniqueKey existed
+   * make sure only one callback with the specific uniqueKey existed
    * @param {*} key : unique key for the callback
    * @param {BatchCallback} fn
    */
