@@ -1,5 +1,7 @@
 ## Intro
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/liuyuchenzh/canvas-node.svg)](https://greenkeeper.io/)
+
 Try to use object to represent canvas drawing.
 
 Still under development
