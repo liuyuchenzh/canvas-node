@@ -6,9 +6,10 @@
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/point-in-polygon/-/point-in-polygon-1.0.0.tgz#c5051ee2b69c97aab7a46d99db4f5268fc90d6cd"
 
-acorn@^5.1.2:
-  version "5.1.2"
-  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.1.2.tgz#911cb53e036807cf0fa778dc5d370fbd864246d7"
+acorn@^5.2.1:
+  version "5.7.4"
+  resolved "https://registry.yarnpkg.com/acorn/-/acorn-5.7.4.tgz#3e8d8a9947d0599a1796d10225d7432f4a4acf5e"
+  integrity sha512-1D++VG7BhrtvQpNbBzovKNc1FLGGEE/oGe7b9xJm/RFHMBeUaUGpluV9RLjZa47YFdPcDAenEYuq9pQPcMdLJg==
 
 arr-diff@^2.0.0:
   version "2.0.0"
@@ -290,11 +291,12 @@ resolve@^1.1.6, resolve@^1.4.0:
   dependencies:
     path-parse "^1.0.5"
 
-rollup-plugin-commonjs@^8.2.5:
-  version "8.2.5"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-commonjs/-/rollup-plugin-commonjs-8.2.5.tgz#924421278a6f879fd976b2ef1a28391b1e4f2a6e"
+rollup-plugin-commonjs@8.4.1:
+  version "8.4.1"
+  resolved "https://registry.yarnpkg.com/rollup-plugin-commonjs/-/rollup-plugin-commonjs-8.4.1.tgz#5c9cea2b2c3de322f5fbccd147e07ed5e502d7a0"
+  integrity sha512-mg+WuD+jlwoo8bJtW3Mvx7Tz6TsIdMsdhuvCnDMoyjh0oxsVgsjB/N0X984RJCWwc5IIiqNVJhXeeITcc73++A==
   dependencies:
-    acorn "^5.1.2"
+    acorn "^5.2.1"
     estree-walker "^0.5.0"
     magic-string "^0.22.4"
     resolve "^1.4.0"
@@ -345,6 +347,7 @@ vlq@^0.2.1:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/vlq/-/vlq-0.2.3.tgz#8f3e4328cf63b1540c0d67e1b2778386f8975b26"
 
-y-event@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/y-event/-/y-event-0.2.0.tgz#36bafee7635d543ec19604259f78a5e0b5f7f0dd"
+y-event@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/y-event/-/y-event-0.2.3.tgz#0622e0651c6b939ad973270dcca01b1e7aa1ec94"
+  integrity sha1-BiLgZRxrk5rZcycNzKAbHnqh7JQ=
