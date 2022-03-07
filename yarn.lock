@@ -2,9 +2,10 @@
 # yarn lockfile v1
 
 
-"@types/point-in-polygon@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@types/point-in-polygon/-/point-in-polygon-1.0.0.tgz#c5051ee2b69c97aab7a46d99db4f5268fc90d6cd"
+"@types/point-in-polygon@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@types/point-in-polygon/-/point-in-polygon-1.1.1.tgz#6459c3d895fe585f2b5c46ff6715b886af4ed2eb"
+  integrity sha512-DDl4uxqbpRsBYg+youv7AbWsED4eycsPiSD+AaB+NAkFjHKHTuij55K29R8rFgqeoeazi/5syNW5J2uNnpS+Ow==
 
 acorn@^5.1.2:
   version "5.1.2"
@@ -345,6 +346,7 @@ vlq@^0.2.1:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/vlq/-/vlq-0.2.3.tgz#8f3e4328cf63b1540c0d67e1b2778386f8975b26"
 
-y-event@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/y-event/-/y-event-0.2.0.tgz#36bafee7635d543ec19604259f78a5e0b5f7f0dd"
+y-event@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/y-event/-/y-event-0.2.3.tgz#0622e0651c6b939ad973270dcca01b1e7aa1ec94"
+  integrity sha1-BiLgZRxrk5rZcycNzKAbHnqh7JQ=
