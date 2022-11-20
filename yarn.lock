@@ -333,9 +333,10 @@ tslib@^1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.8.0.tgz#dc604ebad64bcbf696d613da6c954aa0e7ea1eb6"
 
-typescript@^2.6.1:
-  version "2.6.1"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-2.6.1.tgz#ef39cdea27abac0b500242d6726ab90e0c846631"
+typescript@^4.0.0:
+  version "4.9.3"
+  resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.9.3.tgz#3aea307c1746b8c384435d8ac36b8a2e580d85db"
+  integrity sha512-CIfGzTelbKNEnLpLdGFgdyKhG23CKdKgQPOBc+OUNrkJ2vr+KSzsSV5kq5iWhEQbok+quxgGzrAtGWCyU7tHnA==
 
 universalify@^0.1.0:
   version "0.1.1"
@@ -345,6 +346,7 @@ vlq@^0.2.1:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/vlq/-/vlq-0.2.3.tgz#8f3e4328cf63b1540c0d67e1b2778386f8975b26"
 
-y-event@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/y-event/-/y-event-0.2.0.tgz#36bafee7635d543ec19604259f78a5e0b5f7f0dd"
+y-event@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/y-event/-/y-event-0.2.3.tgz#0622e0651c6b939ad973270dcca01b1e7aa1ec94"
+  integrity sha512-MHe5sCHbGk0tNUU0kSCvG/PApbIWssi1XBclJUsSfLZTsAnNdFEgZE99sqwGuXDxZ7UZT2qYH+L7ImMmfJ29HQ==
