@@ -100,6 +100,11 @@ fs-extra@^4.0.2:
     jsonfile "^4.0.0"
     universalify "^0.1.0"
 
+fsevents@~2.3.2:
+  version "2.3.2"
+  resolved "https://registry.yarnpkg.com/fsevents/-/fsevents-2.3.2.tgz#8a526f78b8fdf4623b709e0b975c52c24c02fd1a"
+  integrity sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==
+
 glob-base@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/glob-base/-/glob-base-0.3.0.tgz#dbb164f6221b1c0b1ccf82aea328b497df0ea3c4"
@@ -325,9 +330,12 @@ rollup-pluginutils@^2.0.1:
     estree-walker "^0.3.0"
     micromatch "^2.3.11"
 
-rollup@^0.51.5:
-  version "0.51.5"
-  resolved "https://registry.yarnpkg.com/rollup/-/rollup-0.51.5.tgz#5caf9101fcaefe344065701ece7de697631a8035"
+rollup@^3.0.0:
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/rollup/-/rollup-3.3.0.tgz#ae8dc84808a9c75d775d8b2ed8db1adada31a581"
+  integrity sha512-wqOV/vUJCYEbWsXvwCkgGWvgaEnsbn4jxBQWKpN816CqsmCimDmCNJI83c6if7QVD4v/zlyRzxN7U2yDT5rfoA==
+  optionalDependencies:
+    fsevents "~2.3.2"
 
 tslib@^1.8.0:
   version "1.8.0"
@@ -345,6 +353,7 @@ vlq@^0.2.1:
   version "0.2.3"
   resolved "https://registry.yarnpkg.com/vlq/-/vlq-0.2.3.tgz#8f3e4328cf63b1540c0d67e1b2778386f8975b26"
 
-y-event@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/y-event/-/y-event-0.2.0.tgz#36bafee7635d543ec19604259f78a5e0b5f7f0dd"
+y-event@^0.2.3:
+  version "0.2.3"
+  resolved "https://registry.yarnpkg.com/y-event/-/y-event-0.2.3.tgz#0622e0651c6b939ad973270dcca01b1e7aa1ec94"
+  integrity sha512-MHe5sCHbGk0tNUU0kSCvG/PApbIWssi1XBclJUsSfLZTsAnNdFEgZE99sqwGuXDxZ7UZT2qYH+L7ImMmfJ29HQ==
