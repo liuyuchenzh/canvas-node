@@ -301,8 +301,7 @@ rollup-plugin-commonjs@^8.2.5:
     rollup-pluginutils "^2.0.1"
 
 rollup-plugin-node-resolve@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-node-resolve/-/rollup-plugin-node-resolve-3.0.0.tgz#8b897c4c3030d5001277b0514b25d2ca09683ee0"
+  version "3.4.0"
   dependencies:
     browser-resolve "^1.11.0"
     builtin-modules "^1.1.0"
