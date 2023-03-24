@@ -291,8 +291,7 @@ resolve@^1.1.6, resolve@^1.4.0:
     path-parse "^1.0.5"
 
 rollup-plugin-commonjs@^8.2.5:
-  version "8.2.5"
-  resolved "https://registry.yarnpkg.com/rollup-plugin-commonjs/-/rollup-plugin-commonjs-8.2.5.tgz#924421278a6f879fd976b2ef1a28391b1e4f2a6e"
+  version "8.4.1"
   dependencies:
     acorn "^5.1.2"
     estree-walker "^0.5.0"
